@@ -1,0 +1,885 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>東海大學社團島</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#BDE5F4">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: full-bleed 3D archipelago as the stage — seven category islands around Luce Chapel, joined by bridges; paper-cut HUD cards pinned to the edges. The sky follows the in-game clock, the UI stays paper. */
+:root{
+  --paper:#FFFDF6;--paper2:#F7F2E4;--ink:#183D3B;--mut:#4F6B69;--line:#E2DCC9;
+  --coral:#F28C72;--sun:#F4C95D;--sea:#5FC4D6;--grass:#8FCB8B;--sand:#F3D7A0;
+  --shadow:0 5px 0 rgba(24,61,59,.14);
+  --f-disp:"Zen Maru Gothic","Noto Sans TC",system-ui,sans-serif;
+  --f-body:"Noto Sans TC","Zen Maru Gothic",system-ui,sans-serif;
+  --sl:max(12px,env(safe-area-inset-left,0px));--sr:max(12px,env(safe-area-inset-right,0px));
+  --sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px);
+  color-scheme:light;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;overflow:hidden;margin:0}
+body{background:#BDE5F4;color:var(--ink);font:400 15px/1.55 var(--f-body);-webkit-tap-highlight-color:transparent;user-select:none}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-disp);font-weight:900;margin:0;text-wrap:balance}
+#stage{position:fixed;inset:0;z-index:0}
+#stage canvas{display:block;width:100%!important;height:100%!important;touch-action:none}
+#lbl{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+
+/* island signs floating over each island */
+.il{position:absolute;left:0;top:0;pointer-events:auto;display:flex;align-items:center;gap:8px;padding:4px 14px 4px 4px;background:var(--paper);border-radius:999px;box-shadow:var(--shadow),0 0 0 2px var(--ink) inset;font:700 15px/1.15 var(--f-disp);white-space:nowrap;will-change:transform;transition:opacity .2s,background .2s;text-align:left}
+.il::after{content:"";position:absolute;left:50%;top:100%;width:2.5px;height:16px;background:var(--ink);translate:-50% 0;border-radius:0 0 2px 2px}
+.il .ic{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--c);box-shadow:0 0 0 2px var(--ink) inset;font-size:17px;flex:none}
+.il small{display:block;font:500 11.5px/1.2 var(--f-body);color:var(--mut);font-variant-numeric:tabular-nums}
+.il .hit{display:inline-block;background:var(--sun);color:var(--ink);border-radius:999px;padding:1px 7px;margin-left:4px;font:700 11px/1.35 var(--f-body);box-shadow:0 0 0 1.5px var(--ink) inset}
+.il.sel{background:var(--ink);color:#fff}
+.il.sel small{color:#cfe0dc}
+.il.dim{opacity:.4}
+.il .ic{position:relative}
+.il.full .ic::after{content:"🏅";position:absolute;right:-7px;top:-8px;font-size:14px}
+.il.ch{padding-right:12px;font-size:13.5px}
+.il.ch .ic{width:26px;height:26px;font-size:14px}
+.il.roll{background:var(--sun)}
+#lbl.cmp .il{font-size:12.5px;padding:3px 10px 3px 3px;gap:5px}
+#lbl.cmp .il small{display:none}
+#lbl.cmp .il .ic{width:24px;height:24px;font-size:13px}
+#lbl.cmp .il::after{height:10px}
+
+/* HUD */
+.hud{position:fixed;z-index:5}
+.card{background:var(--paper);border-radius:20px;box-shadow:var(--shadow),0 0 0 2px var(--ink) inset}
+#top{top:calc(var(--st) + 10px);left:var(--sl);right:var(--sr);display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;pointer-events:none}
+#top>*{pointer-events:auto}
+#brand{padding:8px 14px 9px;justify-self:start;display:grid;gap:2px}
+#brand small{font-size:11.5px;color:var(--mut);letter-spacing:.04em;line-height:1.2}
+#brand h1{font-size:21px;line-height:1.15}
+#brand h1 em{font-style:normal;color:var(--coral);-webkit-text-stroke:.4px var(--ink)}
+#stampBtn{justify-self:start;margin-top:3px;display:inline-flex;gap:6px;align-items:center;font:700 12.5px/1 var(--f-body);background:var(--sun);border-radius:999px;padding:5px 10px 5px 8px;box-shadow:0 0 0 1.5px var(--ink) inset;font-variant-numeric:tabular-nums}
+.rbtns{display:flex;gap:6px}
+.ib{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font:700 15px/1 var(--f-disp)}
+.ib.w{width:auto;padding:0 14px;border-radius:999px;font-size:13px}
+#qwrap{grid-column:1/-1;display:flex;align-items:center;gap:6px;padding:0 6px 0 14px;height:42px;border-radius:999px}
+#qwrap input{flex:1;min-width:0;border:0;background:none;font:inherit;color:var(--ink);height:100%;outline:none}
+#qwrap input::placeholder{color:var(--mut)}
+#qx{width:30px;height:30px;border-radius:50%;background:var(--paper2);font-size:14px}
+#chips{grid-column:1/-1;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 6px;margin:0 calc(-1 * var(--sr)) 0 -2px;padding-right:var(--sr)}
+#chips::-webkit-scrollbar{display:none}
+.chip{flex:none;display:flex;gap:6px;align-items:center;padding:4px 12px 4px 4px;border-radius:999px;background:var(--paper);box-shadow:0 3px 0 rgba(24,61,59,.14),0 0 0 1.5px var(--ink) inset;font:500 13px/1.2 var(--f-body);transition:opacity .2s}
+.chip i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:13px;box-shadow:0 0 0 1.5px var(--ink) inset}
+.chip small{color:var(--mut);font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{background:var(--ink);color:#fff;font-weight:700}
+.chip[aria-pressed="true"] small{color:#cfe0dc}
+.chip.off{opacity:.45}
+#cnt{grid-column:1/-1;justify-self:start;font-size:12.5px;padding:3px 10px;border-radius:999px;background:var(--ink);color:#fff}
+
+#tools{right:var(--sr);top:50%;transform:translateY(-35%);display:grid;gap:8px}
+.tb{width:52px;padding:7px 0 5px;border-radius:16px;display:grid;justify-items:center;gap:1px;font:500 10.5px/1.2 var(--f-body)}
+.tb span{font-size:19px;line-height:1.1}
+.tb em{font-style:normal}
+.tb[aria-pressed="true"]{background:var(--ink);color:#fff}
+#dice{background:var(--coral)}
+
+#bottom{left:var(--sl);right:var(--sr);bottom:calc(var(--sb) + 66px);display:grid;gap:8px;pointer-events:none}
+#bottom>*{pointer-events:auto}
+#ticker{justify-self:start;max-width:100%;display:flex;gap:8px;align-items:center;padding:6px 14px 6px 10px;border-radius:999px;font-size:13px;overflow:hidden}
+#ticker .f{font:700 13px/1 var(--f-disp);flex:none}
+#tk{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;transition:opacity .25s}
+#clock{display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:10px;padding:6px 14px 6px 6px;border-radius:999px;max-width:520px}
+#play{width:34px;height:34px;border-radius:50%;background:var(--ink);color:#fff;font-size:13px}
+#clock .tt{display:grid;line-height:1.15}
+#clock .tt b{font:900 17px/1 var(--f-disp);font-variant-numeric:tabular-nums}
+#clock .tt small{font-size:10.5px;color:var(--mut);white-space:nowrap}
+#tm{width:100%;accent-color:var(--coral);min-width:0}
+
+nav.tab{position:fixed;z-index:6;left:0;right:0;bottom:0;background:var(--coral);box-shadow:0 -2px 0 var(--ink);padding:0 var(--sr) var(--sb) var(--sl);display:grid;grid-template-columns:repeat(4,1fr)}
+nav.tab button{padding:8px 0 7px;display:grid;justify-items:center;gap:1px;font:500 12px/1.2 var(--f-body);color:var(--ink)}
+nav.tab button>span{font-size:18px;line-height:1.2;padding:0 14px;border-radius:999px}
+nav.tab button em{font-style:normal}
+nav.tab button[aria-current="page"]{font-weight:700}
+nav.tab button[aria-current="page"]>span{background:var(--sand);box-shadow:0 0 0 1.5px var(--ink) inset}
+nav.tab b{font:700 10px/1 var(--f-body);background:var(--paper);border-radius:999px;padding:2px 5px;margin-left:2px;font-variant-numeric:tabular-nums}
+
+/* panels */
+#panel,#ccard{position:fixed;z-index:7;left:var(--sl);right:var(--sr);bottom:calc(var(--sb) + 62px)}
+#panel{max-height:min(60vh,640px);display:flex;flex-direction:column;overflow:hidden}
+#panel header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 12px 8px 18px}
+#panel header h2{font-size:22px;display:flex;align-items:center;gap:10px}
+#panel header h2 .ic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--c);box-shadow:0 0 0 2px var(--ink) inset;font-size:21px;flex:none}
+#panel header h2 small{display:block;font:500 12.5px/1.3 var(--f-body);color:var(--mut)}
+#pbody{overflow:auto;padding:0 12px 16px;user-select:text;overscroll-behavior:contain}
+.x{width:36px;height:36px;border-radius:50%;background:var(--paper2);font-size:16px;flex:none}
+.tagl{margin:0 6px 10px;padding:8px 12px;border-radius:14px;background:color-mix(in srgb,var(--c) 26%,var(--paper));font-size:14px}
+.grp h3{font-size:15px;padding:12px 6px 6px;display:flex;gap:6px;align-items:center}
+.grp h3 button{display:flex;gap:6px;align-items:center;font:inherit}
+.grp h4{font:700 12px/1.3 var(--f-body);color:var(--mut);margin:8px 6px 4px;letter-spacing:.04em}
+ul.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+ul.rows li{position:relative;display:flex;background:var(--paper2);border-radius:14px;border-left:7px solid var(--c)}
+.row{flex:1;min-width:0;text-align:left;padding:8px 48px 8px 12px;display:block}
+.row b{display:block;font-weight:500;font-size:15.5px;line-height:1.35}
+.row small{display:block;color:var(--mut);font-size:12.5px;line-height:1.35;overflow-wrap:anywhere}
+.row b .ok{color:#2E8B57;font-size:12px;margin-left:6px;font-weight:700}
+.heart{position:absolute;right:2px;top:50%;translate:0 -50%;width:44px;height:44px;font-size:20px;color:var(--mut)}
+.heart[aria-pressed="true"]{color:var(--coral)}
+.empty{text-align:center;color:var(--mut);padding:28px 10px}
+.face{font:900 34px/1 var(--f-disp)}
+.prog{display:grid;gap:10px;margin:4px 6px 10px}
+.pr{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;font-size:14px;text-align:left;width:100%;padding:2px 0}
+.pr .bar{height:12px;border-radius:999px;background:var(--paper2);box-shadow:0 0 0 1.5px var(--ink) inset;overflow:hidden}
+.pr .bar i{display:block;height:100%;background:var(--c);border-right:1.5px solid var(--ink)}
+.pr .bar i[style*="width:0%"]{border:0}
+.pr small{font-variant-numeric:tabular-nums;color:var(--mut);min-width:3.5em;text-align:right}
+.big{display:flex;align-items:baseline;gap:8px;margin:2px 6px 12px}
+.big b{font:900 40px/1 var(--f-disp);font-variant-numeric:tabular-nums}
+.big span{color:var(--mut)}
+.log{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.log li button{width:100%;display:grid;grid-template-columns:auto 1fr;gap:10px;text-align:left;padding:6px 8px;border-radius:10px;font-size:14px}
+.log li button:hover{background:var(--paper2)}
+.log time{font-variant-numeric:tabular-nums;color:var(--mut);font-size:12.5px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btn{border-radius:999px;padding:9px 16px;background:var(--ink);color:#fff;font-weight:700;font-size:14px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn.g{background:var(--paper);color:var(--ink);box-shadow:0 0 0 2px var(--ink) inset}
+.btn.c{background:var(--coral);color:var(--ink);box-shadow:0 0 0 2px var(--ink) inset}
+.foot{color:var(--mut);font-size:12.5px;margin:16px 6px 0}
+.foot a{color:var(--ink)}
+#ccard{padding:16px 16px 16px 18px;max-width:520px}
+#ccard .x{position:absolute;right:10px;top:10px}
+.pill{display:inline-flex;gap:6px;align-items:center;font-size:12.5px;padding:2px 10px 2px 8px;border-radius:999px;background:color-mix(in srgb,var(--c) 32%,var(--paper));box-shadow:0 0 0 1.5px var(--ink) inset}
+#ck{font:700 13px/1 var(--f-disp);color:var(--coral);margin:0 0 6px}
+#ccard h2{font-size:24px;line-height:1.25;margin:8px 44px 2px 0}
+#ccard .en{color:var(--mut);margin:0;font-size:13.5px}
+.status{margin:10px 0 0;font-size:13.5px;display:flex;gap:8px;align-items:center;padding:6px 10px;border-radius:12px;background:var(--paper2)}
+.status.ok{background:color-mix(in srgb,var(--sun) 40%,var(--paper))}
+.note{font-size:12.5px;color:var(--mut);margin:8px 0 0}
+
+#toast{position:fixed;z-index:9;left:50%;top:calc(var(--st) + 150px);translate:-50% 0;padding:10px 16px;border-radius:16px;font-weight:700;max-width:calc(100% - 32px);text-align:center;transition:opacity .25s,transform .25s;opacity:0;transform:translateY(-8px);pointer-events:none}
+#toast.on{opacity:1;transform:none}
+.cf{position:fixed;z-index:10;pointer-events:none;font-size:22px;left:50%;top:40%}
+
+#splash{position:fixed;inset:0;z-index:20;background:#BDE5F4;display:grid;place-content:center;text-align:center;gap:6px;transition:opacity .5s}
+#splash .face{font-size:56px}
+#splash.out{opacity:0;visibility:hidden;transition:opacity .5s,visibility 0s .5s}
+#splash p{font:700 16px/1.4 var(--f-disp);margin:0}
+#nogl{position:fixed;z-index:4;left:var(--sl);right:var(--sr);top:40%;padding:16px;text-align:center}
+
+dialog{border:0;padding:0;background:var(--paper);color:var(--ink);border-radius:26px;width:min(400px,90vw);box-shadow:var(--shadow),0 0 0 2px var(--ink) inset}
+dialog::backdrop{background:rgba(24,61,59,.55)}
+.din{padding:22px 22px 20px}
+.din h2{font-size:24px;line-height:1.3;margin:8px 0 6px}
+.din p{margin:0}
+.dots{display:flex;gap:6px;margin-top:14px}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--ink)}
+
+@media(min-width:900px){
+  #top{grid-template-columns:auto minmax(260px,420px) 1fr auto;column-gap:12px}
+  #brand{grid-column:1;grid-row:1}
+  #qwrap{grid-column:2;grid-row:1;align-self:start;margin-top:6px}
+  .rbtns{grid-column:4;grid-row:1}
+  #chips{grid-column:1/-1;grid-row:2;margin:0;padding-right:0}
+  #cnt{grid-row:3}
+  #panel{left:auto;width:400px;top:calc(var(--st) + 150px);bottom:calc(var(--sb) + 70px);max-height:none}
+  #ccard{left:calc(var(--sl) + 4px);bottom:calc(var(--sb) + 132px);width:420px}
+  #bottom{right:auto;width:min(560px,calc(100% - 120px))}
+  nav.tab{grid-template-columns:repeat(4,minmax(0,170px));justify-content:center}
+  nav.tab button{display:flex;justify-content:center;align-items:center;gap:8px;padding:10px 0}
+  #tools{transition:right .2s}
+  body.paneled #tools{right:calc(var(--sr) + 412px)}
+}
+@media(max-width:899px){body.carded #tools,body.paneled #tools{opacity:0;pointer-events:none}#tools{transition:opacity .2s}body.paneled #bottom,body.carded #bottom{visibility:hidden}}
+@media(max-width:380px){#brand h1{font-size:18px}.tb{width:46px}#clock .tt small{display:none}.il{font-size:13.5px}}
+@media(hover:hover){.chip:hover,.tb:hover,.ib:hover{filter:brightness(.97)}.row:hover b{text-decoration:underline}.il:hover{filter:brightness(.97)}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head><body>
+
+<div id="stage" aria-label="3D 社團群島地圖"></div>
+<div id="lbl"></div>
+
+<div id="splash"><div class="face">•ᴗ•</div><p data-k="splash">正在搭橋，連起七座社團島…</p></div>
+
+<div class="hud" id="top">
+  <div class="card" id="brand">
+    <small id="sem"></small>
+    <h1 id="ttl"></h1>
+    <button id="stampBtn"><span>🏅</span><span id="stampTxt">0 / 0</span></button>
+  </div>
+  <div class="rbtns">
+    <button class="ib w card langbtn" aria-label="Language / 語言">EN</button>
+    <button class="ib card" id="help" aria-label="使用說明">?</button>
+  </div>
+  <label class="card" id="qwrap"><span aria-hidden="true">⌕</span><input id="q" type="search" autocomplete="off" placeholder="搜尋社團，中英文都可以"><button id="qx" type="button" hidden aria-label="清除">✕</button></label>
+  <div id="chips" role="toolbar" aria-label="小島"></div>
+  <div id="cnt" hidden aria-live="polite"></div>
+</div>
+
+<div class="hud" id="tools">
+  <button class="tb card" id="dice"><span>🎲</span><em data-k="t_dice">抽一個</em></button>
+  <button class="tb card" id="bird" aria-pressed="false"><span>🛰</span><em data-k="t_bird">鳥瞰</em></button>
+  <button class="tb card" id="home"><span>⌂</span><em data-k="t_home">全景</em></button>
+</div>
+
+<div class="hud" id="bottom">
+  <div class="card" id="ticker"><span class="f">•ᴗ•</span><span id="tk"></span></div>
+  <div class="card" id="clock">
+    <button id="play" aria-label="播放一天">▶</button>
+    <div class="tt"><b id="tv">08:00</b><small data-k="day">東海人的一天</small></div>
+    <input id="tm" type="range" min="360" max="1439" step="5" value="480" aria-label="時間">
+  </div>
+</div>
+
+<div class="card" id="ccard" hidden>
+  <button class="x" data-close="card" aria-label="關閉">✕</button>
+  <p id="ck" hidden></p>
+  <div id="cb"></div>
+  <div class="acts">
+    <a class="btn" id="cl" target="_blank" rel="noopener"></a>
+    <button class="btn g" id="cf"></button>
+    <button class="btn c" id="cw" hidden></button>
+  </div>
+</div>
+
+<section class="card" id="panel" hidden aria-live="polite">
+  <header><h2 id="ph"></h2><button class="x" data-close="panel" aria-label="關閉">✕</button></header>
+  <div id="pbody"></div>
+</section>
+
+<div class="card" id="toast" role="status"></div>
+<div class="card" id="nogl" hidden></div>
+
+<nav class="tab" aria-label="主選單">
+  <button data-v="map" aria-current="page"><span>🗺</span><em data-k="nav_map">群島</em></button>
+  <button data-v="list"><span>☰</span><em data-k="nav_list">清單</em></button>
+  <button data-v="fav"><span>♥</span><em><i data-k="nav_fav" style="font-style:normal">收藏</i><b id="fn">0</b></em></button>
+  <button data-v="log"><span>🏅</span><em data-k="nav_log">護照</em></button>
+</nav>
+
+<dialog id="tour"><div class="din">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div class="face">•ᴗ•</div><button class="btn g langbtn" style="padding:6px 12px">EN</button></div>
+  <h2 id="th"></h2><p id="tp"></p>
+  <div class="dots" id="tdots"><i></i><i></i><i></i></div>
+  <div class="acts" style="justify-content:flex-end"><button class="btn g" id="skip" data-k="skip">略過</button><button class="btn" id="next">下一步 →</button></div>
+</div></dialog>
+
+<!-- 資料區：每學期由 社團總覽.xlsx 重新產生，其餘程式不必更動 -->
+<script id="data" type="application/json">{"semester": "115-1", "cats": ["系學會", "學術性", "體能性", "藝術性", "綜合性", "康樂性", "服務性"], "clubs": [{"c": "系學會", "zh": "外文系學會", "en": "Department of Foreign Languages and Literature", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=133", "k": 1, "g": "文學院"}, {"c": "學術性", "zh": "福智青年社", "en": "Bliss & Wisdom Youth Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=66", "k": 1}, {"c": "康樂性", "zh": "音樂遊戲社", "en": "Music Game", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=1&id=69", "k": 1}, {"c": "服務性", "zh": "校園解說員社", "en": "Campus Guide", "u": "https://www.facebook.com/thuguide/", "k": 1}, {"c": "藝術性", "zh": "風信子民謠吉他社", "en": "Phonshins Guitar", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=3&id=13", "k": 1}, {"c": "綜合性", "zh": "境外生聯誼會", "en": "International Students Association", "u": "https://www.facebook.com/tunghaiocsa/", "k": 1}, {"c": "體能性", "zh": "拳擊社", "en": "Boxing", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=34", "k": 1}, {"c": "系學會", "zh": "資工系學會", "en": "Department of Computer Science", "u": "https://club.thu.edu.tw/web/news/list.php?cid=8", "k": 0, "g": "工學院"}, {"c": "學術性", "zh": "同人創作文化研究社", "en": "Doujin Culture Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=57", "k": 1}, {"c": "康樂性", "zh": "廚藝文化社", "en": "Cooking Culture", "u": "https://sites.google.com/club.thu.edu.tw/thu-ccc/%E9%A6%96%E9%A0%81", "k": 1}, {"c": "服務性", "zh": "山地服務社", "en": "KAVIAZ", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=5&id=18", "k": 1}, {"c": "藝術性", "zh": "火舞藝術社", "en": "Fire Dance", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=3&id=9", "k": 1}, {"c": "綜合性", "zh": "師資培育中心學生自治社", "en": "Teacher Education Autonomous", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=6&id=157", "k": 1}, {"c": "體能性", "zh": "古代騎射社", "en": "Horseback Archery", "u": "https://club.thu.edu.tw/web/news/list.php?cid=2", "k": 0}, {"c": "系學會", "zh": "工設系學會", "en": "Department of Industrial Design", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=152", "k": 1, "g": "創意設計暨藝術學院"}, {"c": "學術性", "zh": "辯論社", "en": "Debate Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=68", "k": 1}, {"c": "康樂性", "zh": "日本麻雀牌研究社", "en": "Japanese Mahjong", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=1&id=89", "k": 1}, {"c": "服務性", "zh": "社會服務團", "en": "Social Service", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=5&id=15", "k": 1}, {"c": "藝術性", "zh": "千陽管樂社", "en": "Qian Yang Wind Band", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=3&id=8", "k": 1}, {"c": "綜合性", "zh": "知心交流社", "en": "Knowing-Heart", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=6&id=169", "k": 1}, {"c": "體能性", "zh": "橄欖球社", "en": "Rugby Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=46", "k": 1}, {"c": "系學會", "zh": "財金系學會", "en": "Department of Finance", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=143", "k": 1, "g": "管理學院"}, {"c": "學術性", "zh": "金融實務研習社", "en": "Financial Practice Research", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=59", "k": 1}, {"c": "康樂性", "zh": "幻想魔術社", "en": "Magic", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=1&id=20", "k": 1}, {"c": "服務性", "zh": "法律服務社", "en": "Law Aid", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=5&id=92", "k": 1}, {"c": "藝術性", "zh": "爵士樂社", "en": "Jazz", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=3&id=41", "k": 1}, {"c": "綜合性", "zh": "原。歸社", "en": "LOKAH", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=6&id=170", "k": 1}, {"c": "體能性", "zh": "保齡球社", "en": "Bowling Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=32", "k": 1}, {"c": "系學會", "zh": "音樂系學會", "en": "Department of Music", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=159", "k": 1, "g": "創意設計暨藝術學院"}, {"c": "學術性", "zh": "國際法學研究社", "en": "International Law", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=63", "k": 1}, {"c": "康樂性", "zh": "烘焙社", "en": "Baking", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=1&id=22", "k": 1}, {"c": "服務性", "zh": "四健會", "en": "4H", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=5&id=114", "k": 1}, {"c": "藝術性", "zh": "熱門音樂社", "en": "Hot Music", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=3&id=38", "k": 1}, {"c": "綜合性", "zh": "國際菁英組學生聯誼會", "en": "International Elite Student Association", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=6&id=81", "k": 1}, {"c": "體能性", "zh": "足球社", "en": "Football Club", "u": "https://www.facebook.com/THUFC", "k": 1}, {"c": "系學會", "zh": "歷史系學會", "en": "Department of History", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=136", "k": 1, "g": "文學院"}, {"c": "學術性", "zh": "TRPG 奇幻社", "en": "TRPG Fantasy", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=171", "k": 1}, {"c": "康樂性", "zh": "TCG活動社", "en": "Trading Card Game Activity", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=1&id=110", "k": 1}, {"c": "服務性", "zh": "快樂領航社", "en": "Nevigation Happiness", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=5&id=112", "k": 1}, {"c": "藝術性", "zh": "韓國流行舞蹈社", "en": "K-POP Dance", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=3&id=42", "k": 1}, {"c": "綜合性", "zh": "光鹽社", "en": "Tunghai Light and Salt Student Association", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=6&id=158", "k": 1}, {"c": "體能性", "zh": "風之舞溜冰社", "en": "Wind Skating Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=33", "k": 1}, {"c": "系學會", "zh": "化材系學會", "en": "Department of Chemical and Materials Engineering", "u": "https://club.thu.edu.tw/web/news/list.php?cid=8", "k": 0, "g": "工學院"}, {"c": "學術性", "zh": "駭客社", "en": "Hacker Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=95", "k": 1}, {"c": "康樂性", "zh": "DJ數位音樂創作社", "en": "DJ League", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=1&id=2", "k": 1}, {"c": "服務性", "zh": "浪浪中途與生命暨環境教育志工隊", "en": "TNR and TNTA Volunteer Team", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=5&id=165", "k": 1}, {"c": "藝術性", "zh": "花藝社", "en": "Flower Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=3&id=180", "k": 1}, {"c": "體能性", "zh": "瑜珈社", "en": "Yoga Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=44", "k": 1}, {"c": "系學會", "zh": "行政系學會", "en": "Department of Public Management and Policy", "u": "https://club.thu.edu.tw/web/news/list.php?cid=8", "k": 0, "g": "社會科學學院"}, {"c": "學術性", "zh": "青年領袖研究社", "en": "Leadership", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=60", "k": 1}, {"c": "康樂性", "zh": "機動車輛研究社", "en": "Motor", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=1&id=1", "k": 1}, {"c": "服務性", "zh": "羅浮童軍團", "en": "Rover Scout", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=5&id=14", "k": 1}, {"c": "藝術性", "zh": "流行歌唱研習社", "en": "Pop Music Singing", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=3&id=62", "k": 1}, {"c": "體能性", "zh": "跆拳社", "en": "Taekwondo Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=40", "k": 1}, {"c": "系學會", "zh": "國貿系學會", "en": "Department of International Business", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=144", "k": 1, "g": "管理學院"}, {"c": "學術性", "zh": "AI資料應用社", "en": "Artificial Intelligence Data Application", "u": "https://club.thu.edu.tw/web/news/list.php?cid=4", "k": 0}, {"c": "康樂性", "zh": "PODCAST製作社", "en": "Podcast Production", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=1&id=105", "k": 1}, {"c": "服務性", "zh": "崇慧社", "en": "Chong Hu", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=5&id=17", "k": 1}, {"c": "藝術性", "zh": "電腦繪圖創作研究社", "en": "Digital Art", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=3&id=35", "k": 1}, {"c": "體能性", "zh": "空手道社", "en": "Karate Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=31", "k": 1}, {"c": "系學會", "zh": "哲學系學會", "en": "Department of Philosophy", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=135", "k": 1, "g": "文學院"}, {"c": "學術性", "zh": "中文角落", "en": "Chinese Corner", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=173", "k": 1}, {"c": "康樂性", "zh": "京劇社", "en": "Peking Opera", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=1&id=168", "k": 1}, {"c": "服務性", "zh": "東海導航社", "en": "The Navigators Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=5&id=164", "k": 1}, {"c": "藝術性", "zh": "雲筑箏社", "en": "Guzheng", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=3&id=26", "k": 1}, {"c": "體能性", "zh": "籃球社", "en": "Basketball Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=49", "k": 1}, {"c": "系學會", "zh": "工工系學會", "en": "Department of Industrial Engineering＆Enterprise Information", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=120", "k": 1, "g": "工學院"}, {"c": "學術性", "zh": "女性主義與性別工作坊", "en": "Feminism and Gender", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=103", "k": 1}, {"c": "康樂性", "zh": "生存遊戲社", "en": "Airsoft", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=1&id=52", "k": 1}, {"c": "藝術性", "zh": "漢光國樂社", "en": "Hanguang Chinese Music", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=3&id=36", "k": 1}, {"c": "體能性", "zh": "登山社", "en": "Mountaineering Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=37", "k": 1}, {"c": "系學會", "zh": "畜產系學會", "en": "Department of Animal Science and Biotechnology", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=151", "k": 1, "g": "農業暨健康學院"}, {"c": "學術性", "zh": "台灣文化研究社", "en": "Taiwan Culture", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=3", "k": 1}, {"c": "康樂性", "zh": "調酒飲料研習社", "en": "Mixology", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=1&id=70", "k": 1}, {"c": "藝術性", "zh": "愛樂社", "en": "Philharmonic", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=3&id=30", "k": 1}, {"c": "體能性", "zh": "飛盤社", "en": "Ultimate Frisbee", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=77", "k": 1}, {"c": "系學會", "zh": "環工系學會", "en": "Department of Envirpnmental Sciencn and Engineering", "u": "https://club.thu.edu.tw/web/news/list.php?cid=8", "k": 0, "g": "工學院"}, {"c": "學術性", "zh": "天文社", "en": "Astronomical", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=55", "k": 1}, {"c": "康樂性", "zh": "咖啡社", "en": "Coffee", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=1&id=27", "k": 1}, {"c": "藝術性", "zh": "攝影社", "en": "Photography", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=3&id=84", "k": 1}, {"c": "體能性", "zh": "東海羽球聯盟", "en": "THU Badminton Federation", "u": "https://club.thu.edu.tw/web/news/list.php?cid=2", "k": 0}, {"c": "系學會", "zh": "建築系學會", "en": "Department of Architecture", "u": "https://club.thu.edu.tw/web/news/list.php?cid=8", "k": 0, "g": "創意設計暨藝術學院"}, {"c": "學術性", "zh": "野鳥社", "en": "Ornithology Society", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=4", "k": 1}, {"c": "藝術性", "zh": "熱門舞蹈社", "en": "Dance", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=3&id=39", "k": 1}, {"c": "體能性", "zh": "劍道社", "en": "Kendo", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=45", "k": 1}, {"c": "系學會", "zh": "永續系學會", "en": "Student Association of Sustainability Science and Management Program", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=161", "k": 1, "g": "國際學院"}, {"c": "學術性", "zh": "聖經生命研究社", "en": "Bible Life Study", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=65", "k": 1}, {"c": "藝術性", "zh": "現代舞蹈社", "en": "Modern Dance", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=3&id=23", "k": 1}, {"c": "體能性", "zh": "肌力與體能社", "en": "THU S&C", "u": "https://club.thu.edu.tw/web/news/list.php?cid=2", "k": 0}, {"c": "系學會", "zh": "健運系學會", "en": "Sports Recreation and Health Management Degree Program", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=154", "k": 1, "g": "農業暨健康學院"}, {"c": "學術性", "zh": "數位遊戲研究創作社", "en": "Digital Game Study Creater", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=101", "k": 1}, {"c": "藝術性", "zh": "搖滾音樂研究社", "en": "Rock Music Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=3&id=88", "k": 1}, {"c": "體能性", "zh": "滑板社", "en": "Skateboarding Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=43", "k": 1}, {"c": "系學會", "zh": "國經系學會", "en": "International Business Administration Program", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=149", "k": 1, "g": "國際學院"}, {"c": "學術性", "zh": "企業導生社", "en": "Enterprise Mentor Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=56", "k": 1}, {"c": "體能性", "zh": "水上活動社", "en": "Water Sport", "u": "https://www.facebook.com/thuswimmingteam/?ref=hl", "k": 1}, {"c": "系學會", "zh": "應數系學會", "en": "Department of Applied Mathematics", "u": "https://club.thu.edu.tw/web/news/list.php?cid=8", "k": 0, "g": "理學院"}, {"c": "學術性", "zh": "法輪大法社", "en": "Falun Dafa", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=97", "k": 1}, {"c": "體能性", "zh": "排球社", "en": "Volleyball Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=74", "k": 1}, {"c": "系學會", "zh": "社工系學會", "en": "Department of Social Work", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=140", "k": 1, "g": "社會科學學院"}, {"c": "學術性", "zh": "創客社", "en": "Maker Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=172", "k": 1}, {"c": "體能性", "zh": "射箭社", "en": "Archery Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=78", "k": 1}, {"c": "系學會", "zh": "景觀系學會", "en": "Department of Landscape Architecture", "u": "https://club.thu.edu.tw/web/news/list.php?cid=8", "k": 0, "g": "創意設計暨藝術學院"}, {"c": "學術性", "zh": "東海西洋棋社", "en": "THU Chess Club", "u": "https://club.thu.edu.tw/web/news/list.php?cid=4", "k": 0}, {"c": "體能性", "zh": "馬拉松社", "en": "Marathon Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=177", "k": 1}, {"c": "系學會", "zh": "資管系學會", "en": "Department of Information management", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=150", "k": 1, "g": "管理學院"}, {"c": "學術性", "zh": "禪悅社", "en": "Zen Joy Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=67", "k": 1}, {"c": "體能性", "zh": "競技啦啦社", "en": "Competitive Cheerleading", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=48", "k": 1}, {"c": "系學會", "zh": "美術系學會", "en": "Department of Fine Arts", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=162", "k": 1, "g": "創意設計暨藝術學院"}, {"c": "學術性", "zh": "易經研究社", "en": "I-Ching club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=176", "k": 1}, {"c": "體能性", "zh": "棒球社", "en": "Baseball Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=6", "k": 1}, {"c": "系學會", "zh": "企管系學會", "en": "Department of Business administration", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=142", "k": 1, "g": "管理學院"}, {"c": "學術性", "zh": "桌上遊戲研究社", "en": "Board Game", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=61", "k": 1}, {"c": "體能性", "zh": "自由潛水社", "en": "Freediving Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=104", "k": 1}, {"c": "系學會", "zh": "統計系學會", "en": "Department of Statistics", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=148", "k": 1, "g": "管理學院"}, {"c": "學術性", "zh": "崇德文化青年社", "en": "Chong De Volunteers Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=4&id=64", "k": 1}, {"c": "體能性", "zh": "運動防護社", "en": "Athletic Training", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=175", "k": 1}, {"c": "系學會", "zh": "法律系學會", "en": "Department of Law", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=137", "k": 1, "g": "法律學院"}, {"c": "體能性", "zh": "八方傳統武術社", "en": "Ba-Fang traditional martial arts", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=71", "k": 1}, {"c": "系學會", "zh": "餐旅系學會", "en": "Department of Hospitality Management", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=155", "k": 1, "g": "農業暨健康學院"}, {"c": "體能性", "zh": "馬術社", "en": "Equestrian Club", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=2&id=108", "k": 1}, {"c": "系學會", "zh": "食科系學會", "en": "Department of Food Science", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=153", "k": 1, "g": "農業暨健康學院"}, {"c": "系學會", "zh": "經濟系學會", "en": "Department of Economics", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=139", "k": 1, "g": "社會科學學院"}, {"c": "系學會", "zh": "中文系學會", "en": "Department of Chinese Literature", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=132", "k": 1, "g": "文學院"}, {"c": "系學會", "zh": "會計系學會", "en": "Department of Accounting", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=141", "k": 1, "g": "管理學院"}, {"c": "系學會", "zh": "政治系學會", "en": "Department of Political Science", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=138", "k": 1, "g": "社會科學學院"}, {"c": "系學會", "zh": "日文系學會", "en": "Department of Japanese Language and Culture", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=134", "k": 1, "g": "文學院"}, {"c": "系學會", "zh": "化學系學會", "en": "Department of Chemistry", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=118", "k": 1, "g": "理學院"}, {"c": "系學會", "zh": "生科系學會", "en": "Department of Life Science", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=119", "k": 1, "g": "理學院"}, {"c": "系學會", "zh": "社會系學會", "en": "Department of Sociology", "u": "https://club.thu.edu.tw/web/news/list.php?cid=8", "k": 0, "g": "社會科學學院"}, {"c": "系學會", "zh": "電機系學會", "en": "Department of Electrical Engineering", "u": "https://club.thu.edu.tw/web/news/list.php?cid=8", "k": 0, "g": "工學院"}, {"c": "系學會", "zh": "進修班美術系學會", "en": "Department of Fine Arts Extension Education", "u": "https://club.thu.edu.tw/web/news/list.php?cid=8", "k": 0, "g": "創意設計暨藝術學院"}, {"c": "系學會", "zh": "應物系學會", "en": "Department of Applied Chemistry", "u": "https://club.thu.edu.tw/web/news/detail.php?cid=8&id=160", "k": 1, "g": "理學院"}], "colleges": ["文學院", "理學院", "工學院", "管理學院", "社會科學學院", "農業暨健康學院", "創意設計暨藝術學院", "法律學院", "國際學院"]}</script>
+
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const $=id=>document.getElementById(id);
+const E=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const D=JSON.parse($('data').textContent);
+const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+let LG=LS.get('club-lang','zh')==='en'?'en':'zh';
+
+/* ---------- text ---------- */
+const TX={zh:{
+ title:'東海大學社團島',h1:'東海大學社團<em>島</em>',splash:'正在搭橋，連起七座社團島…',ph:'搜尋社團，中英文都可以',
+ t_dice:'抽一個',t_bird:'鳥瞰',t_home:'全景',day:'東海人的一天',
+ nav_map:'群島',nav_list:'清單',nav_fav:'收藏',nav_log:'護照',skip:'略過',next:'下一步 →',go:'開始探索',
+ lit:n=>`找到 ${n} 個社團`,none:'沒有符合的社團，換個關鍵字試試。',other:'其他',hits:n=>`${n} 符合`,
+ full:'看完整介紹 ↗',site:'到社團總覽查看 ↗',nopage:'社團總覽網站上沒有這個社團的獨立介紹頁，連結會帶你到分類頁。',
+ save:'♡ 收藏',saved:'♥ 已收藏',walk:'🚶 走過去蓋章',dice_k:'🎲 今天的緣分是…',
+ st_ok:t=>`✓ 已蓋章 · ${t}`,st_go:'🚶 •ᴗ• 正在過橋…',st_no:'•ᴗ• 走到這座島上，就能蓋到這個社團的章。',
+ stamped:n=>`蓋章！${n}`,arrived:n=>`${n} 到了！`,district_done:c=>`🎉 「${c}」的章全部集滿了！`,all_done:n=>`🏆 ${n} 個社團的章全部集滿，你是社團島的島主了！`,
+ favh:'我的收藏',favp:'帶著這份清單去逛社團博覽會吧。',fave:'還沒有收藏。點一座島、挑一個社團，按 ♡ 收藏。',copy:'複製清單',copied:'已複製',copyfail:'已選取文字，請手動複製',copyhdr:'我想參觀的社團：\n',
+ listh:'全部社團',logh:'社團護照',logp:(n,t)=>`/ ${t} 個社團已蓋章`,recent:'最近蓋的章',loge:'還沒有印章。點一個社團，•ᴗ• 會走過橋幫你蓋章。',
+ reset:'清除所有印章',reset2:'確定清除？再按一次',
+ chapel:'路思義教堂',chapel_s:'群島中心',chapel_t:'這裡是群島的中心：路思義教堂。七座社團島都有橋通到這裡。',
+ clubs:n=>`${n} 個社團`,stampsOf:(m,t)=>`🏅 ${m}/${t}`,
+ sem:(y,s)=>`${y} 學年度第 ${s} 學期`,
+ foot:n=>`資料來源：課外活動暨學生發展組，共 ${n} 個社團。完整介紹請見 <a href="https://club.thu.edu.tw/" target="_blank" rel="noopener">東海大學社團總覽網站</a>。`,
+ tips:['點一座島，看看島上住了哪些社團','拖曳移動地圖，兩指縮放或旋轉','每座島的顏色和建築，代表一種社團類型','拉動下方時間軸，看看島上的一天','按 🎲，讓島嶼替你挑一個社團','集滿一座島的章，會解鎖那座島的成就'],
+ events:[[6,'清晨，相思林裡的鳥先醒了'],[8,'第一堂課，橋上都是趕課的人'],[12,'午餐時間，社團攤位前最熱鬧'],[15,'下午，體能島的球聲沒停過'],[18,'傍晚，社辦的燈一盞盞亮起'],[19.5,'社課時間，群島最熱鬧的時候'],[22,'夜深了，藝術島還有人在練團']],
+ steps:n=>[['歡迎登上東海大學社團島！',`${n} 個社團依類型住在 7 座小島上，小島之間有橋相連，中間是路思義教堂。`],['點一座島，看看島上有誰','點小島或上方的島名，就會打開那座島的社團清單。點一個社團，•ᴗ• 會走過橋去幫你蓋章。'],['不知道從哪裡開始？','按 🎲 讓島嶼替你抽一個，或用搜尋找出有符合社團的小島。拉動時間軸，看島上從清晨到深夜。']]
+},en:{
+ title:'Tunghai University Club Island',h1:'Tunghai Club <em>Islands</em>',splash:'Building bridges between seven islands…',ph:'Search clubs in Chinese or English',
+ t_dice:'Pick',t_bird:'Top',t_home:'Reset',day:'A day at Tunghai',
+ nav_map:'Islands',nav_list:'List',nav_fav:'Saved',nav_log:'Passport',skip:'Skip',next:'Next →',go:'Start exploring',
+ lit:n=>`${n} matching clubs`,none:'No matching clubs. Try another keyword.',other:'Other',hits:n=>`${n} match`,
+ full:'See full details ↗',site:'View on club website ↗',nopage:'This club has no page of its own on the club website, so the link opens its category page.',
+ save:'♡ Save',saved:'♥ Saved',walk:'🚶 Walk there',dice_k:'🎲 Your match today is…',
+ st_ok:t=>`✓ Stamped · ${t}`,st_go:'🚶 •ᴗ• is crossing the bridge…',st_no:'Walk to this island to collect the club’s stamp.',
+ stamped:n=>`Stamped! ${n}`,arrived:n=>`Arrived at ${n}`,district_done:c=>`🎉 Every stamp on ${c} collected!`,all_done:n=>`🏆 All ${n} stamps collected. The islands are yours!`,
+ favh:'Saved clubs',favp:'Take this list to the club fair.',fave:'Nothing saved yet. Open an island, pick a club and press ♡.',copy:'Copy list',copied:'Copied',copyfail:'Text selected. Copy it manually.',copyhdr:'Clubs I want to visit:\n',
+ listh:'All clubs',logh:'Club passport',logp:(n,t)=>`/ ${t} clubs stamped`,recent:'Recent stamps',loge:'No stamps yet. Pick a club and •ᴗ• will cross the bridges to stamp it.',
+ reset:'Clear all stamps',reset2:'Tap again to clear',
+ chapel:'Luce Chapel',chapel_s:'Centre',chapel_t:'The heart of the islands: Luce Memorial Chapel. Every island has a bridge leading here.',
+ clubs:n=>`${n} clubs`,stampsOf:(m,t)=>`🏅 ${m}/${t}`,
+ sem:(y,s)=>`Academic Year ${+y+1911}–${String((+y+1912)%100).padStart(2,'0')}, Semester ${s}`,
+ foot:n=>`Source: Extracurricular Activities and Student Development Division, ${n} clubs. For full details see the <a href="https://club.thu.edu.tw/" target="_blank" rel="noopener">Tunghai University club website</a>.`,
+ tips:['Tap an island to see who lives there','Drag to move, pinch to zoom or rotate','Each island’s colour and building stands for one club type','Slide the clock to watch a day on the islands','Tap 🎲 and let the islands pick a club','Collect every stamp on an island to complete it'],
+ events:[[6,'Dawn. The birds in the acacia grove wake first'],[8,'First class. The bridges fill with students'],[12,'Lunch. Club booths are at their busiest'],[15,'Afternoon. The courts on Athletics Isle never go quiet'],[18,'Evening. Club room lights come on one by one'],[19.5,'Club meeting time, the liveliest hour'],[22,'Late night. Someone on Arts Isle is still rehearsing']],
+ steps:n=>[['Welcome to Tunghai Club Islands!',`${n} clubs live on 7 islands, one per club type. Bridges join the islands, with Luce Chapel in the middle.`],['Tap an island to meet its clubs','Tap an island or its name at the top to open its club list. Pick a club and •ᴗ• walks across the bridges to stamp it.'],['Not sure where to start?','Tap 🎲 to let the islands pick, or search to find which islands have a match. Slide the clock to watch the islands from dawn to midnight.']]
+}};
+const tx=k=>TX[LG][k];
+const CN={'系學會':'Departments','康樂性':'Recreation','體能性':'Athletics','藝術性':'Arts','學術性':'Academic','服務性':'Service','綜合性':'Community'};
+const GN={'文學院':'College of Arts','理學院':'College of Science','工學院':'College of Engineering','管理學院':'College of Management','社會科學學院':'College of Social Science','農業暨健康學院':'College of Agriculture and Health','創意設計暨藝術學院':'College of Fine Arts and Creative Design','法律學院':'College of Law','國際學院':'International College'};
+const ISN={zh:{'系學會':'系學會島','學術性':'學術島','體能性':'體能島','藝術性':'藝術島','綜合性':'綜合島','康樂性':'康樂島','服務性':'服務島'},en:{'系學會':'Department Isle','學術性':'Academic Isle','體能性':'Athletics Isle','藝術性':'Arts Isle','綜合性':'Community Isle','康樂性':'Recreation Isle','服務性':'Service Isle'}};
+const TAG={zh:{'系學會':'各系的家，認識學長姐的第一站。','學術性':'研究、思辨、桌遊與觀星，把好奇心養大。','體能性':'球場、道館和山林，一起流汗最快樂。','藝術性':'音樂、舞蹈、影像，舞台等你上來。','綜合性':'跨越文化與身分，在這裡交朋友。','康樂性':'遊戲、美食、興趣，玩得很認真。','服務性':'走進部落與社區，用行動陪伴。'},
+ en:{'系學會':'Every department’s home base. Meet your seniors here.','學術性':'Research, debate, games and stargazing.','體能性':'Courts, dojos and mountain trails.','藝術性':'Music, dance and film. The stage is yours.','綜合性':'Friendship across cultures and backgrounds.','康樂性':'Games, food and hobbies, taken seriously.','服務性':'Serving villages and communities.'}};
+/* [colour, icon, building] per club type */
+const STY={'系學會':['#F28C72','🏫','school'],'學術性':['#5D9FE3','🔭','observatory'],'體能性':['#F4C95D','🏀','gym'],'藝術性':['#B98BD9','🎸','stage'],'綜合性':['#5FBFA8','👥','tent'],'康樂性':['#F2A65A','🎲','camp'],'服務性':['#E88AAE','🫶','cottage']};
+const FBC=['#7FB3D5','#C9A0DC','#9CCB86','#F0B27A'];
+const sty=c=>STY[c]||[FBC[D.cats.indexOf(c)%4],'⭐','cottage'];
+const cn=c=>LG==='en'?(CN[c]||c):c,gn=g=>LG==='en'?(GN[g]||g):g;
+const isn=c=>ISN[LG][c]||(LG==='en'?(CN[c]||c)+' Isle':c+'島');
+const tagl=c=>TAG[LG][c]||'';
+const nm=x=>LG==='en'?(x.en||x.zh):x.zh,nm2=x=>LG==='en'?x.zh:(x.en||'');
+
+/* ---------- state ---------- */
+const CLUBS=[];
+D.cats.forEach(c=>{const L=D.clubs.filter(x=>x.c===c);const gs=D.colleges||[];L.sort((a,b)=>((gs.indexOf(a.g)+1||99)-(gs.indexOf(b.g)+1||99))||a.zh.localeCompare(b.zh,'zh-Hant'));CLUBS.push(...L)});
+D.clubs.filter(x=>!D.cats.includes(x.c)).forEach(x=>{D.cats.push(x.c);CLUBS.push(x)});
+CLUBS.forEach((x,i)=>x.i=i);
+const by=Object.fromEntries(CLUBS.map(x=>[x.zh,x]));
+const ISLES=D.cats.map(c=>({c,L:CLUBS.filter(x=>x.c===c)})).filter(d=>d.L.length);
+ISLES.forEach((d,i)=>d.i=i);
+const isleOf=x=>ISLES.find(d=>d.c===x.c);
+const FKEY='club-fav-'+D.semester,SKEY='club-stamp-'+D.semester;
+let fav=new Set();try{fav=new Set(JSON.parse(LS.get(FKEY,'[]')))}catch(e){}
+let stamps={};try{stamps=JSON.parse(LS.get(SKEY,'{}'))||{}}catch(e){}
+let q='',view='map',cur=null,curIsle=null,bird=false;
+const ok=x=>!q||(x.zh+' '+x.en+' '+(x.g||'')+' '+x.c+' '+isn(x.c)).toLowerCase().includes(q);
+const saveFav=()=>{LS.set(FKEY,JSON.stringify([...fav]));$('fn').textContent=fav.size};
+const saveSt=()=>LS.set(SKEY,JSON.stringify(stamps));
+const [SY,STm]=D.semester.split('-');
+const fmtT=ts=>{const d=new Date(ts);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`};
+const hash=s=>{let h=2166136261;for(const ch of String(s)){h^=ch.codePointAt(0);h=Math.imul(h,16777619)}return (h>>>0)/4294967296};
+
+/* ---------- archipelago layout: seven islands in a ring around the chapel ---------- */
+const TOP=1,FACE=Math.PI/4,SPOT_A=Math.PI/4;// every building faces the default camera
+const CENTER={x:0,z:0,r:6.2,pr:3.4,seed:1.3,center:true};
+ISLES.forEach(d=>{d.r=4.2+Math.sqrt(d.L.length)*.62;d.pr=2.7+Math.max(0,d.r-5.5)*.3;d.seed=hash(d.c)*10});
+const NI=ISLES.length;
+ISLES.forEach((d,i)=>{d.a=-Math.PI*.75+i*2*Math.PI/NI;d.dist=CENTER.r*1.15+d.r*1.15+3.2});
+if(NI>2)for(let it=0;it<600;it++){let bad=false;
+  for(let i=0;i<NI;i++){const A=ISLES[i],B=ISLES[(i+1)%NI];const dx=Math.cos(A.a)*A.dist-Math.cos(B.a)*B.dist,dz=Math.sin(A.a)*A.dist-Math.sin(B.a)*B.dist;
+    if(Math.hypot(dx,dz)<(A.r+B.r)*1.15+3.2){A.dist+=.08;B.dist+=.08;bad=true}}
+  if(!bad)break}
+ISLES.forEach(d=>{d.x=Math.cos(d.a)*d.dist;d.z=Math.sin(d.a)*d.dist});
+const rad=(d,a)=>d.r*(1+.07*Math.sin(3*a+d.seed)+.045*Math.sin(5*a+d.seed*1.7)+.03*Math.sin(2*a+d.seed*.6));
+const WORLD_R=Math.max(...ISLES.map(d=>d.dist+d.r*1.15))+1;
+
+/* ---------- UI helpers ---------- */
+let toastT;function toast(msg,ms=2400){const t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),ms)}
+function confetti(){if(RM)return;const em=['🎉','✨','🏅','💛','🎊'];for(let i=0;i<18;i++){const s=document.createElement('div');s.className='cf';s.textContent=em[i%em.length];document.body.appendChild(s);const a=Math.random()*Math.PI*2,r=120+Math.random()*160;s.animate([{transform:'translate(-50%,-50%) scale(.4)',opacity:1},{transform:`translate(calc(-50% + ${Math.cos(a)*r}px),calc(-50% + ${Math.sin(a)*r-60}px)) scale(1.1) rotate(${(Math.random()-.5)*200}deg)`,opacity:0}],{duration:1300+Math.random()*500,easing:'cubic-bezier(.2,.7,.3,1)'}).onfinish=()=>s.remove()}}
+let tickI=0,tickHold=0;
+function tick(msg,hold=6){const s=$('tk');s.style.opacity=0;setTimeout(()=>{s.textContent=msg;s.style.opacity=1},RM?0:200);tickHold=performance.now()+hold*1000}
+setInterval(()=>{if(performance.now()<tickHold)return;const t=tx('tips');tick(t[tickI++%t.length],0)},6500);
+
+/* ---------- 3D ---------- */
+let renderer,scene,camera,controls,ok3d=true;
+const stage=$('stage');
+try{
+  renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.75));
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.outputColorSpace=THREE.SRGBColorSpace;
+  stage.appendChild(renderer.domElement);
+}catch(e){ok3d=false}
+
+const V3=THREE.Vector3,C=h=>new THREE.Color(h);
+const tmpM=new THREE.Matrix4(),tmpQ=new THREE.Quaternion(),tmpE=new THREE.Euler(),tmpV=new V3(),tmpS=new V3();
+const PM=(x,y,z,sx,sy,sz,ry=0)=>new THREE.Matrix4().compose(new V3(x,y,z),new THREE.Quaternion().setFromEuler(new THREE.Euler(0,ry,0)),new V3(sx,sy,sz));
+/* local frame along a direction T: x = side, y = up, z = T */
+const basisM=(pos,T,sx,sy,sz)=>{const t=T.clone().normalize(),s=new V3(t.z,0,-t.x).normalize(),u=new V3().crossVectors(t,s);return new THREE.Matrix4().makeBasis(s,u,t).scale(new V3(sx,sy,sz)).setPosition(pos)};
+const lighten=(c,k)=>'#'+C(c).lerp(C('#ffffff'),k).getHexString();
+const darken=(c,k)=>'#'+C(c).lerp(C('#3b2a1e'),k).getHexString();
+function canvasTex(w,h,draw,rep){const cv=document.createElement('canvas');cv.width=w;cv.height=h;draw(cv.getContext('2d'),w,h);const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;if(rep){t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(...rep)}t.anisotropy=4;return t}
+const rr=(g,x,y,w,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()};
+
+let world={};const pick=[],signs=[],isleGroups=[];
+if(ok3d){
+  scene=new THREE.Scene();
+  const G={
+    box:new THREE.BoxGeometry(1,1,1).translate(0,.5,0),cbox:new THREE.BoxGeometry(1,1,1),
+    cyl:new THREE.CylinderGeometry(.5,.5,1,18).translate(0,.5,0),cone:new THREE.ConeGeometry(.5,1,18).translate(0,.5,0),
+    sphc:new THREE.SphereGeometry(.5,18,12)
+  };
+  /* textures */
+  const T={
+    grass:canvasTex(128,128,(g,w,h)=>{g.fillStyle='#9BD06E';g.fillRect(0,0,w,h);g.fillStyle='#86BF5C';for(let i=0;i<14;i++){const x=hash('gx'+i)*w,y=hash('gy'+i)*h;g.beginPath();g.moveTo(x,y);g.lineTo(x+7,y+10);g.lineTo(x-7,y+10);g.closePath();g.fill()}},[.22,.22]),
+    corr:canvasTex(8,32,(g,w,h)=>{for(let y=0;y<h;y+=8){g.fillStyle='#ffffff';g.fillRect(0,y,w,5);g.fillStyle='#d6d6d6';g.fillRect(0,y+5,w,3)}},[1,1.6]),
+    wood:canvasTex(32,64,(g,w,h)=>{g.fillStyle='#ffffff';g.fillRect(0,0,w,h);g.fillStyle='#d9cbbb';for(let y=15;y<h;y+=16)g.fillRect(0,y,w,2)},[1,2]),
+    tile:canvasTex(128,128,(g,w,h)=>{const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#EFA24C');gr.addColorStop(1,'#E08A3A');g.fillStyle=gr;g.fillRect(0,0,w,h);g.strokeStyle='#F7C277';g.lineWidth=3;
+      for(let k=-h;k<w+h;k+=32){g.beginPath();g.moveTo(k,0);g.lineTo(k+h,h);g.stroke();g.beginPath();g.moveTo(k+h,0);g.lineTo(k,h);g.stroke()}g.strokeStyle='rgba(150,80,30,.35)';g.lineWidth=1.5;g.beginPath();g.moveTo(0,h/2);g.lineTo(w,h/2);g.stroke()},[1,1]),
+  };
+  const stripeC=new Map();
+  const stripeTex=col=>{if(!stripeC.has(col))stripeC.set(col,canvasTex(256,8,(g,w,h)=>{for(let i=0;i<12;i++){g.fillStyle=i%2?'#FFFDF6':col;g.fillRect(i*w/12,0,w/12+1,h)}}));return stripeC.get(col)};
+  const matC=new Map();
+  const lam=(c,o={},key='')=>{const k=c+key+(o.side||'');if(!matC.has(k))matC.set(k,new THREE.MeshLambertMaterial({color:c,...o}));return matC.get(k)};
+  const MT={
+    std:new THREE.MeshLambertMaterial({color:0xffffff}),
+    glow:new THREE.MeshBasicMaterial({color:0xffffff}),
+    win:new THREE.MeshBasicMaterial({color:0x4E6470}),
+    fire:new THREE.MeshBasicMaterial({color:0xFF9A3C}),fire2:new THREE.MeshBasicMaterial({color:0xFFE07A}),
+    sand:new THREE.MeshLambertMaterial({color:0xF1DCA7}),cliff:new THREE.MeshLambertMaterial({color:0xB48A60}),
+    grass:new THREE.MeshLambertMaterial({color:0xffffff,map:T.grass}),
+    shallow:new THREE.MeshBasicMaterial({color:0xA6E6EA,transparent:true,opacity:.6,depthWrite:false}),
+    foam:new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.6,depthWrite:false}),
+    path:new THREE.MeshLambertMaterial({color:0xDDBF8C}),
+    glass:new THREE.MeshLambertMaterial({color:0x2E4656,emissive:0x000000}),
+  };
+  world={G,MT,T};
+  const mesh=(geo,mat,x=0,y=0,z=0,parent)=>{const m=new THREE.Mesh(geo,typeof mat==='string'?lam(mat):mat);m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;parent&&parent.add(m);return m};
+  /* B: box with its base at y; Cy: cylinder with its base at y */
+  const B=(p,mat,w,h,d,x,y,z,ry=0)=>{const m=mesh(G.box,mat,x,y,z,p);m.scale.set(w,h,d);m.rotation.y=ry;return m};
+  const Cy=(p,mat,r,h,x,y,z)=>{const m=mesh(G.cyl,mat,x,y,z,p);m.scale.set(r*2,h,r*2);return m};
+  const Sp=(p,mat,sx,sy,sz,x,y,z)=>{const m=mesh(G.sphc,mat,x,y,z,p);m.scale.set(sx,sy,sz);return m};
+  const roofC=new Map();const roofMat=c=>{if(!roofC.has(c))roofC.set(c,new THREE.MeshLambertMaterial({color:c,map:T.corr}));return roofC.get(c)};
+  const woodM=c=>lam(c,{map:T.wood},'wood');
+  const gable=(w,d,h,over=.2)=>{const s=new THREE.Shape();s.moveTo(-w/2-over,0);s.lineTo(w/2+over,0);s.lineTo(0,h);s.closePath();return new THREE.ExtrudeGeometry(s,{depth:d+over*2,bevelEnabled:true,bevelThickness:.06,bevelSize:.06,bevelSegments:2}).translate(0,0,-(d/2+over))};
+
+  /* instanced batches for the many small things (trees, flowers, planks) */
+  const BT=new Map();
+  const bat=(g,M,c,m='std')=>{const k=g+'|'+m;if(!BT.has(k))BT.set(k,[]);BT.get(k).push({M,c:C(c)})};
+  const flush=()=>{for(const [k,L] of BT){const [g,m]=k.split('|');const im=new THREE.InstancedMesh(G[g],MT[m],L.length);L.forEach((p,j)=>{im.setMatrixAt(j,p.M);im.setColorAt(j,p.c)});im.castShadow=m==='std';im.receiveShadow=true;scene.add(im)}};
+
+  /* sign board like the "Nook 商店" one: icon square + name */
+  function sign(p,d,x,y,z,w=2.1){const cv=document.createElement('canvas');cv.width=512;cv.height=160;const tex=new THREE.CanvasTexture(cv);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=4;
+    const wood=lam('#8A5A36');const face=new THREE.MeshLambertMaterial({map:tex,emissive:0x222222});
+    const m=new THREE.Mesh(new THREE.BoxGeometry(w,w*160/512,.1),[wood,wood,wood,wood,face,wood]);m.position.set(x,y,z);m.castShadow=true;p.add(m);
+    const s={cv,tex,d};signs.push(s);drawSign(s);return m}
+  world.drawSign=null;
+  function drawSign(s){const g=s.cv.getContext('2d'),W=512,H=160,[col,ic]=s.d?sty(s.d.c):['#E39A4A','⛪'];g.clearRect(0,0,W,H);
+    rr(g,5,5,W-10,H-10,24);g.fillStyle='#FFFDF6';g.fill();g.lineWidth=8;g.strokeStyle='#5B4636';g.stroke();
+    rr(g,20,20,120,120,20);g.fillStyle=col;g.fill();
+    g.textAlign='center';g.textBaseline='middle';g.font='76px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';g.fillText(ic,80,86);
+    g.fillStyle='#3D2E22';g.textAlign='left';const label=s.d?isn(s.d.c):tx('chapel');let fs=LG==='en'?54:70;g.font=`900 ${fs}px "Zen Maru Gothic","Noto Sans TC",sans-serif`;
+    while(g.measureText(label).width>330&&fs>30){fs-=2;g.font=`900 ${fs}px "Zen Maru Gothic","Noto Sans TC",sans-serif`}g.fillText(label,160,84);s.tex.needsUpdate=true}
+  world.redrawSigns=()=>signs.forEach(drawSign);
+
+  const win=(p,x,y,z,w=.5,h=.46)=>{B(p,'#FFFDF6',w+.12,h+.12,.06,x,y-.06,z-.01);B(p,MT.win,w,h,.07,x,y,z);B(p,'#FFFDF6',.04,h,.08,x,y,z);B(p,'#FFFDF6',w,.04,.08,x,y+h/2-.02,z)};
+  const door=(p,x,y,z,w=.66,h=.88,col='#7A4E2D')=>{B(p,darken(col,.3),w+.1,h+.06,.06,x,y,z-.01);B(p,col,w,h,.08,x,y,z);Sp(p,'#F4C95D',.07,.07,.07,x+w*.32,y+h*.45,z+.06)};
+
+  /* ---------- buildings, one per club type (local space, front = +z) ---------- */
+  const BUILD={
+    school(g,d,col){
+      B(g,'#E3CFA8',3.0,.22,2.1,0,0,0);B(g,woodM('#F6EAD0'),2.9,1.62,2.0,0,.22,0);B(g,'#C9A27A',3.02,.08,2.12,0,1.78,0);
+      mesh(gable(2.9,2.0,.95),roofMat(col),0,1.84,0,g);
+      B(g,'#F6EAD0',.8,.85,.8,0,2.35,.2);mesh(new THREE.CylinderGeometry(.25,.25,.06,24).rotateX(Math.PI/2),'#FFFDF6',0,2.78,.62,g);
+      B(g,'#3D2E22',.03,.17,.02,0,2.78,.66);B(g,'#3D2E22',.13,.03,.02,.05,2.78,.66);
+      mesh(new THREE.ConeGeometry(.66,.62,4).rotateY(Math.PI/4).translate(0,.31,0),roofMat(col),0,3.2,.2,g);Sp(g,'#F4C95D',.16,.16,.16,0,3.9,.2);
+      door(g,0,.22,1.01);win(g,-.95,.6,1.01);win(g,.95,.6,1.01);sign(g,d,0,1.5,1.06);
+      Cy(g,'#7A6A5A',.04,2.4,-1.85,0,1.2);B(g,col,.6,.36,.03,-1.82,1.95,1.2);return 4.0},
+    observatory(g,d,col){const st='#EFE7D6';
+      Cy(g,st,1.25,1.75,0,0,-.4);Cy(g,col,1.29,.16,0,1.55,-.4);
+      mesh(new THREE.SphereGeometry(1.28,28,14,0,Math.PI*2,0,Math.PI/2),'#EAF2FB',0,1.72,-.4,g);
+      const sl=B(g,'#3A4C78',.36,1.15,.08,0,1.9,.82);sl.rotation.x=-.55;
+      const tel=mesh(new THREE.CylinderGeometry(.14,.18,1.4,14),'#5A6B8C',0,2.55,.2,g);tel.rotation.x=-.85;
+      B(g,st,2.5,1.6,1.05,0,0,.95);B(g,col,2.7,.16,1.25,0,1.6,.95);B(g,lighten(col,.4),2.7,.06,1.25,0,1.76,.95);
+      [-.95,.95].forEach(x=>{Cy(g,'#FFFDF6',.1,1.6,x,0,1.5)});
+      door(g,0,0,1.49,.7,.82,'#5E7DB0');win(g,-.62,.3,1.49,.34,.4);win(g,.62,.3,1.49,.34,.4);sign(g,d,0,1.2,1.53,1.9);return 3.3},
+    gym(g,d,col){
+      B(g,woodM('#F3E6CB'),3.2,1.6,2.2,0,0,0);
+      const bar=new THREE.CylinderGeometry(1.75,1.75,2.5,28,1,false,Math.PI/2,Math.PI).rotateX(Math.PI/2);
+      const rf=mesh(bar,roofMat(col),0,1.6,0,g);rf.scale.y=.55;
+      [-.9,0,.9].forEach(z=>{const r=mesh(new THREE.CylinderGeometry(1.79,1.79,.1,28,1,false,Math.PI/2,Math.PI).rotateX(Math.PI/2),'#FFFDF6',0,1.6,z,g);r.scale.y=.56});
+      door(g,0,0,1.11,.9,.9,'#B8743A');win(g,-1.1,.5,1.11,.5,.36);win(g,1.1,.5,1.11,.5,.36);sign(g,d,0,1.28,1.16);
+      Cy(g,'#5A6170',.06,2.1,2.1,0,.6);B(g,'#FFFFFF',.08,.6,.8,2.06,1.7,.6);const ring=mesh(new THREE.TorusGeometry(.2,.03,8,20).rotateX(Math.PI/2),'#F07A3A',1.83,1.85,.6,g);
+      Sp(g,'#F08A3C',.34,.34,.34,1.55,.17,1.65);return 2.8},
+    stage(g,d,col){
+      B(g,'#C79A66',3.3,.45,2.1,0,0,0);B(g,'#E8CFA8',3.36,.06,2.16,0,.45,0);
+      const sh=mesh(new THREE.SphereGeometry(1.6,30,14,Math.PI,Math.PI,0,Math.PI/2),lam(col),0,.5,-.15,g);sh.scale.y=1.35;
+      const sh2=mesh(new THREE.SphereGeometry(1.56,30,14,Math.PI,Math.PI,0,Math.PI/2),lam(lighten(col,.55),{side:THREE.BackSide}),0,.5,-.15,g);sh2.scale.y=1.35;
+      const arch=mesh(new THREE.TorusGeometry(1.6,.12,10,30,Math.PI),'#F4C95D',0,.5,-.15,g);arch.scale.y=1.35;
+      [-1.35,1.35].forEach(x=>{B(g,'#3B3B48',.46,.72,.46,x,.51,.55);Sp(g,'#777788',.26,.26,.05,x,.95,.79)});
+      Cy(g,'#333',.02,.75,0,.51,.45);Sp(g,'#555',.12,.14,.12,0,1.3,.45);
+      B(g,col,.12,.32,.12,0,2.62,-.15);sign(g,d,0,3.05,-.12);
+      [[-.6,1.4],[.7,1.6],[.1,1.9]].forEach(([x,y],i)=>{Sp(g,MT.win,.16,.12,.16,x,y,-.6)});return 3.5},
+    tent(g,d,col){
+      Cy(g,lighten(col,.6),1.6,1.1,0,0,0);
+      mesh(new THREE.ConeGeometry(1.95,1.5,24,1,true).translate(0,.75,0),new THREE.MeshLambertMaterial({map:stripeTex(col),side:THREE.DoubleSide}),0,1.08,0,g);
+      for(let k=0;k<18;k++){const a=k/18*Math.PI*2;Sp(g,col,.42,.26,.42,Math.sin(a)*1.9,1.08,Math.cos(a)*1.9)}
+      Cy(g,'#6B5B4B',.035,.8,0,2.5,0);B(g,col,.5,.3,.03,.25,2.95,0);
+      B(g,'#2F4D49',.8,.86,.08,0,0,1.58);sign(g,d,0,1.28,2.02,1.8);
+      Cy(g,'#8A5A36',.05,1.6,-.85,0,1.98);Cy(g,'#8A5A36',.05,1.6,.85,0,1.98);return 3.4},
+    camp(g,d,col){
+      const tent=(x,z,ry,c,s)=>{const t=new THREE.Group();mesh(gable(1.4*s,1.7*s,1.25*s,.06),lam(c),0,0,0,t);
+        const fl=new THREE.Shape();fl.moveTo(-.32*s,0);fl.lineTo(.32*s,0);fl.lineTo(0,.85*s);fl.closePath();mesh(new THREE.ShapeGeometry(fl),'#5B3A2A',0,.01,.92*s,t);
+        t.position.set(x,0,z);t.rotation.y=ry;g.add(t)};
+      tent(-1.15,-.35,.35,col,1);tent(1.2,-.55,-.3,lighten(col,.35),.9);
+      Cy(g,'#8A5A36',.06,2.0,-.95,0,.95);Cy(g,'#8A5A36',.06,2.0,.95,0,.95);sign(g,d,0,1.95,1.0);
+      for(let k=0;k<7;k++){const a=k/7*Math.PI*2;Sp(g,'#9C9A92',.2,.14,.2,Math.cos(a)*.34,.05,1.75+Math.sin(a)*.34)}
+      [0,1.1,2.2].forEach(a=>{const l=mesh(new THREE.CylinderGeometry(.06,.06,.6,8).rotateZ(Math.PI/2),'#7A4F2D',0,.08,1.75,g);l.rotation.y=a});
+      const f1=mesh(new THREE.ConeGeometry(.2,.55,8).translate(0,.27,0),MT.fire,0,.08,1.75,g),f2=mesh(new THREE.ConeGeometry(.1,.32,8).translate(0,.16,0),MT.fire2,0,.1,1.8,g);f1.castShadow=f2.castShadow=false;
+      (world.fires||(world.fires=[])).push(f1,f2);
+      [[-.85,2.05,.6],[.85,2.1,-.6]].forEach(([x,z,ry])=>{const s=mesh(new THREE.CylinderGeometry(.16,.16,.75,10).rotateZ(Math.PI/2),'#9A6B43',x,.16,z,g);s.rotation.y=ry});
+      return 2.7},
+    cottage(g,d,col){
+      B(g,'#D7A26C',2.75,.18,2.1,0,0,0);B(g,woodM('#E9B97F'),2.6,1.62,2.0,0,.18,0);
+      mesh(gable(2.6,2.0,1.0),roofMat(col),0,1.8,0,g);B(g,'#B9876A',.36,.75,.36,.75,2.25,-.4);
+      door(g,0,.18,1.01,.64,.9,'#8C5A36');Sp(g,'#E8506A',.16,.14,.04,0,.86,1.08);
+      win(g,-.85,.62,1.01,.46,.42);win(g,.85,.62,1.01,.46,.42);
+      [-.85,.85].forEach(x=>{B(g,col,.62,.13,.18,x,.48,1.08);[-.2,0,.2].forEach(o=>Sp(g,o?'#FFFDF6':'#F4C95D',.12,.12,.12,x+o,.66,1.1))});
+      sign(g,d,0,1.45,1.06);
+      Cy(g,'#7A5A40',.05,.6,1.6,0,1.3);B(g,col,.3,.26,.42,1.6,.6,1.3);return 3.2}
+  };
+
+  /* ---------- the Luce Memorial Chapel: two leaning ruled shells, glass ends, skylight along the ridge ---------- */
+  function chapel(){
+    const g=new THREE.Group(),W=1.55,H=3.8,L=3.2,gap=.07;
+    const prof=(v,u)=>{const p=1.5+.45*Math.sin(Math.PI*u);return gap+(W-gap)*Math.pow(1-v,p)};
+    const shell=s=>{const nu=18,nv=24,pos=[],uv=[],idx=[];
+      for(let i=0;i<=nu;i++)for(let j=0;j<=nv;j++){const u=i/nu,v=j/nv;pos.push(s*prof(v,u),v*H,-L/2+u*L);uv.push(u*3,v*5)}
+      for(let i=0;i<nu;i++)for(let j=0;j<nv;j++){const a=i*(nv+1)+j,b=a+nv+1;s>0?idx.push(a,b,a+1,b,b+1,a+1):idx.push(a,a+1,b,b,a+1,b+1)}
+      const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.setIndex(idx);geo.computeVertexNormals();
+      return mesh(geo,new THREE.MeshLambertMaterial({map:T.tile,side:THREE.DoubleSide}),0,0,0,g)};
+    shell(1);shell(-1);
+    /* glass end walls with mullions, framed by orange ribs */
+    [-1,1].forEach(e=>{const u=e<0?0:1,z=e*(L/2-.1);const sh=new THREE.Shape();const n=20;
+      for(let j=0;j<=n;j++){const v=j/n;const x=prof(v,u)-.02;j?sh.lineTo(x,v*H):sh.moveTo(x,0)}for(let j=n;j>=0;j--){const v=j/n;sh.lineTo(-(prof(v,u)-.02),v*H)}
+      mesh(new THREE.ShapeGeometry(sh),MT.glass,0,0,z,g);
+      for(let x=-1.2;x<=1.21;x+=.3){const ax=Math.abs(x);if(ax>=W-.05)continue;const vh=1-Math.pow(Math.max(0,(ax-gap)/(W-gap)),1/(1.5)),hh=Math.max(.1,vh*H-.05);B(g,'#4A4F55',.035,hh,.04,x,0,z+e*.02)}
+      [.9,1.9].forEach(y=>{const hw=prof(y/H,u)-.05;B(g,'#4A4F55',hw*2,.035,.04,0,y,z+e*.02)});
+      [-1,1].forEach(s=>{const pts=[];for(let j=0;j<=16;j++){const v=j/16;pts.push(new V3(s*prof(v,u),v*H,e*L/2))}
+        mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),24,.07,8),'#C46F2C',0,0,0,g)});
+      B(g,'#7A4E2D',.55,.85,.06,0,0,z+e*.04)});
+    B(g,MT.win,gap*2.2,.06,L,0,H-.05,0);
+    B(g,'#D9D2C3',W*2+.7,.16,L+.9,0,-.06,0);B(g,'#CFC7B6',1.4,.1,.5,0,-.06,L/2+.65);
+    return g}
+
+  /* ---------- islands ---------- */
+  const shp=(d,s)=>{const pts=[];for(let k=0;k<72;k++){const a=k/72*Math.PI*2,R=rad(d,a)*s;pts.push(new THREE.Vector2(Math.cos(a)*R,-Math.sin(a)*R))}return pts};
+  function island(d){
+    const g=new THREE.Group();g.position.set(d.x,0,d.z);scene.add(g);
+    const ext=(s,depth,bev,mat,y)=>{const geo=new THREE.ExtrudeGeometry(new THREE.Shape(shp(d,s)),{depth,bevelEnabled:bev>0,bevelThickness:bev,bevelSize:bev,bevelSegments:3,curveSegments:4});geo.rotateX(-Math.PI/2);const m=mesh(geo,mat,0,y,0,g);return m};
+    ext(1.14,.4,.14,MT.sand,-.42);
+    ext(.97,.8,0,MT.cliff,.05);
+    ext(1.0,.05,.08,MT.grass,TOP-.13);
+    const sh=new THREE.ShapeGeometry(new THREE.Shape(shp(d,1.45)));sh.rotateX(-Math.PI/2);const sm=new THREE.Mesh(sh,MT.shallow);sm.position.y=.015;sm.renderOrder=1;g.add(sm);
+    const fs=new THREE.Shape(shp(d,1.24));fs.holes.push(new THREE.Path(shp(d,1.18)));const fg=new THREE.ShapeGeometry(fs);fg.rotateX(-Math.PI/2);const fm=new THREE.Mesh(fg,MT.foam);fm.position.y=.03;fm.renderOrder=2;g.add(fm);
+    return g}
+  /* plaza in the island's colour; a dirt path from the plaza to each bridge */
+  function plaza(g,d,col,bridgeAngles){
+    const disc=new THREE.Mesh(new THREE.CircleGeometry(d.pr+.45,48).rotateX(-Math.PI/2),lam(lighten(col,.62)));disc.position.y=TOP+.012;disc.receiveShadow=true;g.add(disc);
+    const ring=new THREE.Mesh(new THREE.RingGeometry(d.pr+.45,d.pr+.66,48).rotateX(-Math.PI/2),lam(lighten(col,.15)));ring.position.y=TOP+.014;ring.receiveShadow=true;g.add(ring);
+    bridgeAngles.forEach(a=>{const r0=d.pr+.5,r1=rad(d,a)*.93,len=r1-r0,mr=(r0+r1)/2;const m=new THREE.Mesh(G.box,MT.path);m.scale.set(len,.02,1.2);m.position.set(Math.cos(a)*mr,TOP,Math.sin(a)*mr);m.rotation.y=-a;m.receiveShadow=true;g.add(m)})}
+
+  /* decoration helpers (world space, batched) */
+  function tree(x,z,s,h){bat('cyl',PM(x,TOP,z,.24*s,.75*s,.24*s),'#8B5E3C');const g1=h<.5?'#5DAA4F':'#68B457',g2='#7FC86A';
+    bat('sphc',PM(x,TOP+1.2*s,z,1.3*s,1.05*s,1.3*s),g1);bat('sphc',PM(x+.28*s,TOP+1.6*s,z+.12*s,.9*s,.78*s,.9*s),g2);bat('sphc',PM(x-.3*s,TOP+1.42*s,z-.22*s,.82*s,.72*s,.82*s),g1)}
+  function cedar(x,z,s){bat('cyl',PM(x,TOP,z,.2*s,.5*s,.2*s),'#7A5233');[0,1,2].forEach(k=>bat('cone',PM(x,TOP+.35*s+k*.48*s,z,(1.35-k*.34)*s,.95*s,(1.35-k*.34)*s),k%2?'#3F8F5B':'#4C9F65'))}
+  function flowers(x,z,col,seed){for(let k=0;k<4;k++){const ox=(hash(seed+'x'+k)-.5)*.7,oz=(hash(seed+'z'+k)-.5)*.7;
+    bat('cyl',PM(x+ox,TOP,z+oz,.035,.2,.035),'#4E9A4A');bat('sphc',PM(x+ox,TOP+.24,z+oz,.22,.14,.22),col);bat('sphc',PM(x+ox,TOP+.28,z+oz,.08,.08,.08),'#FFE27A')}}
+  function bush(x,z,s,col){bat('sphc',PM(x,TOP+.26*s,z,.9*s,.62*s,.9*s),col);bat('sphc',PM(x+.3*s,TOP+.22*s,z+.1*s,.6*s,.45*s,.6*s),col)}
+  function lamp(x,z){bat('cyl',PM(x,TOP,z,.07,1.1,.07),'#3D4A48');bat('box',PM(x,TOP+1.08,z,.22,.06,.22),'#3D4A48');bat('sphc',PM(x,TOP+1.24,z,.24,.28,.24),'#ffffff','win');bat('box',PM(x,TOP+1.36,z,.26,.06,.26),'#3D4A48')}
+  function rock(x,z,s){bat('sphc',PM(x,TOP+.08*s,z,.6*s,.38*s,.5*s),'#A9A49A')}
+  const angOff=(a,b)=>Math.abs(Math.atan2(Math.sin(a-b),Math.cos(a-b)));
+  function decorate(d,bridgeAngles,col){const placed=[],N=Math.round(d.r*2.4),flc=[col,'#FFFDF6','#F7D54E','#F28C9E',col];
+    for(let k=0;k<N*8&&placed.length<N;k++){const a=hash(d.seed+'a'+k)*Math.PI*2,edge=rad(d,a)*.86,r0=d.pr+1.0;if(edge<r0+.2)continue;
+      const r=r0+hash(d.seed+'r'+k)*(edge-r0);if(bridgeAngles.some(b=>angOff(a,b)<.34))continue;
+      const x=d.x+Math.cos(a)*r,z=d.z+Math.sin(a)*r;if(placed.some(p=>Math.hypot(p[0]-x,p[1]-z)<1.25))continue;placed.push([x,z]);
+      const t=hash(d.seed+'t'+k),front=angOff(a,SPOT_A)<.75;
+      if(front||t>.8)flowers(x,z,flc[k%flc.length],d.seed+k);else if(t<.45)tree(x,z,.72+hash(d.seed+'s'+k)*.35,t);else if(t<.62)cedar(x,z,.85+hash(d.seed+'c'+k)*.3);else if(t<.72)bush(x,z,.9,'#5FA552');else rock(x,z,.9)}
+    [SPOT_A+.62,SPOT_A-.62].forEach(a=>lamp(d.x+Math.cos(a)*(d.pr+.85),d.z+Math.sin(a)*(d.pr+.85)))}
+
+  /* ---------- bridges ---------- */
+  const bridges=[];
+  function bridge(A,Bn){const ang=Math.atan2(Bn.z-A.z,Bn.x-A.x),ux=Math.cos(ang),uz=Math.sin(ang);
+    const ra=rad(A,ang)*.9,rb=rad(Bn,ang+Math.PI)*.9;
+    const p0=new V3(A.x+ux*ra,TOP+.04,A.z+uz*ra),p1=new V3(Bn.x-ux*rb,TOP+.04,Bn.z-uz*rb),L=p0.distanceTo(p1),arch=Math.min(.75,.15+L*.06);
+    const at=t=>new V3().lerpVectors(p0,p1,t).setY(TOP+.04+Math.sin(Math.PI*t)*arch);
+    const tan=t=>at(Math.min(1,t+.01)).sub(at(Math.max(0,t-.01)));
+    const n=Math.ceil(L/.3);for(let k=0;k<n;k++){const t=(k+.5)/n;bat('cbox',basisM(at(t),tan(t),1.6,.12,.27),k%2?'#C8925A':'#B98450')}
+    [-1,1].forEach(s=>{const side=new V3(uz,0,-ux).multiplyScalar(s*.78);const np=Math.max(2,Math.round(L/1.1));let prev=null;
+      for(let k=0;k<=np;k++){const t=k/np,b=at(t).add(side),end=k===0||k===np;bat('cbox',basisM(b.clone().setY(b.y+.3),new V3(ux,0,uz),end?.18:.12,end?.75:.6,end?.18:.12),'#7A4F2D');
+        const top=b.clone().setY(b.y+.55);if(prev){const mid=prev.clone().add(top).multiplyScalar(.5);bat('cbox',basisM(mid,top.clone().sub(prev),.08,.08,prev.distanceTo(top)),'#9A6A3E')}prev=top}});
+    const br={A,B:Bn,ang,at,L};bridges.push(br);return br}
+
+  /* build the world */
+  const cg=island(CENTER);cg.userData.chapel=true;pick.push(cg);
+  const ch=chapel();ch.position.set(0,TOP,0);ch.rotation.y=FACE+.6;ch.scale.setScalar(1.2);cg.add(ch);/* turned three-quarters so the tiled shell shows, as in the photo */
+  {const ring=new THREE.Mesh(new THREE.RingGeometry(CENTER.pr-.25,CENTER.pr+.45,64).rotateX(-Math.PI/2),MT.path);ring.position.y=TOP+.012;ring.receiveShadow=true;cg.add(ring)}
+  const centerAngles=ISLES.map(d=>d.a);
+  ISLES.forEach(d=>{const a=d.a,r0=CENTER.pr+.4,r1=rad(CENTER,a)*.93,m=new THREE.Mesh(G.box,MT.path);m.scale.set(r1-r0,.02,1.2);m.position.set(Math.cos(a)*(r0+r1)/2,TOP,Math.sin(a)*(r0+r1)/2);m.rotation.y=-a;m.receiveShadow=true;cg.add(m)});
+  ISLES.forEach((d,i)=>{const [col,,kind]=sty(d.c);const g=island(d);g.userData.isle=i;pick.push(g);isleGroups[i]=g;
+    const toC=Math.atan2(-d.z,-d.x),ang=[toC];if(NI>2){const nx=ISLES[(i+1)%NI],pv=ISLES[(i-1+NI)%NI];ang.push(Math.atan2(nx.z-d.z,nx.x-d.x),Math.atan2(pv.z-d.z,pv.x-d.x))}
+    d.bridgeAngles=ang;plaza(g,{...d},col,ang.map(a=>a));
+    const bg=new THREE.Group();bg.position.set(0,TOP,0);bg.rotation.y=FACE;g.add(bg);d.top=(BUILD[kind]||BUILD.cottage)(bg,d,col);
+    decorate(d,ang,col)});
+  decorate(CENTER,centerAngles,'#F2A65A');
+  world.radial=ISLES.map(d=>bridge(CENTER,d));
+  world.ring=NI>2?ISLES.map((d,i)=>bridge(d,ISLES[(i+1)%NI])):[];
+  flush();
+
+  /* sea */
+  const water=new THREE.Mesh(new THREE.PlaneGeometry(600,600),new THREE.MeshLambertMaterial({color:0x5FC4D6}));water.rotation.x=-Math.PI/2;water.receiveShadow=true;scene.add(water);world.water=water;
+  const NW=70,waves=new THREE.InstancedMesh(new THREE.BoxGeometry(.9,.02,.08),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.7}),NW);
+  world.waveData=[...Array(NW)].map((_,i)=>{let x,z,k=0;do{const a=hash('w'+i+k)*Math.PI*2,r=4+hash('r'+i+k)*(WORLD_R+10);x=Math.cos(a)*r;z=Math.sin(a)*r;k++}while(k<20&&([CENTER,...ISLES].some(d=>Math.hypot(x-d.x,z-d.z)<d.r*1.5)));return{x,z,p:hash('p'+i)*6,s:.6+hash('s'+i)*.8}});
+  waves.frustumCulled=false;scene.add(waves);world.waves=waves;
+  const sel=new THREE.Mesh(new THREE.RingGeometry(1,1.05,72).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.9,depthWrite:false}));sel.position.y=.05;sel.visible=false;scene.add(sel);world.sel=sel;
+  /* boat */
+  const boat=new THREE.Group();mesh(new THREE.BoxGeometry(1.1,.28,.45),'#F28C72',0,.08,0,boat);const sail=mesh(new THREE.ConeGeometry(.32,.95,3),'#FFFDF6',.05,.65,0,boat);sail.scale.z=.3;scene.add(boat);world.boat=boat;
+  /* clouds */
+  world.clouds=[];for(let i=0;i<7;i++){const g=new THREE.Group();for(let j=0;j<3;j++){const s=new THREE.Mesh(G.sphc,new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:.93}));const k=1.6+hash('c'+i+j)*1.6;s.scale.set(k*1.2,k*.8,k);s.position.set(j*1.3-1.3,0,(hash('cz'+i+j)-.5));g.add(s)}
+    g.position.set((hash('cx'+i)-.5)*WORLD_R*2.4,10+hash('cy'+i)*3,(hash('cz'+i)-.5)*WORLD_R*2.4);scene.add(g);world.clouds.push(g)}
+
+  /* islander •ᴗ• */
+  const av=new THREE.Group();
+  Cy(av,'#4A5A78',.07,.2,-.09,0,0);Cy(av,'#4A5A78',.07,.2,.09,0,0);
+  const body=mesh(new THREE.CylinderGeometry(.19,.25,.42,16).translate(0,.21,0),'#F28C72',0,.18,0,av);
+  const head=new THREE.Group();head.position.y=.86;av.add(head);
+  Sp(head,'#F7D7BE',.62,.58,.6,0,0,0);const hair=mesh(new THREE.SphereGeometry(.33,18,10,0,Math.PI*2,0,Math.PI*.52),'#5A3B2B',0,.02,-.03,head);hair.rotation.x=-.25;
+  const cv=document.createElement('canvas');cv.width=256;cv.height=128;const cx2=cv.getContext('2d');
+  const drawFace=()=>{cx2.clearRect(0,0,256,128);cx2.fillStyle='rgba(242,140,114,.55)';cx2.beginPath();cx2.arc(52,84,18,0,7);cx2.arc(204,84,18,0,7);cx2.fill();cx2.fillStyle='#183D3B';cx2.font='900 92px "Zen Maru Gothic",sans-serif';cx2.textAlign='center';cx2.textBaseline='middle';cx2.fillText('•ᴗ•',128,66)};drawFace();
+  const face=new THREE.Mesh(new THREE.PlaneGeometry(.42,.21),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),transparent:true}));face.material.map.colorSpace=THREE.SRGBColorSpace;face.position.set(0,-.04,.302);head.add(face);
+  scene.add(av);world.av=av;world.avBody=body;
+  document.fonts?.ready?.then(()=>{drawFace();face.material.map.needsUpdate=true;world.redrawSigns()});
+
+  /* lights */
+  const hemi=new THREE.HemisphereLight(0xffffff,0xA9C48F,.85);scene.add(hemi);
+  const sunL=new THREE.DirectionalLight(0xffffff,1.1);sunL.castShadow=true;sunL.shadow.mapSize.set(2048,2048);const sc=sunL.shadow.camera;sc.left=sc.bottom=-WORLD_R;sc.right=sc.top=WORLD_R;sc.near=1;sc.far=140;sunL.shadow.bias=-.0006;sunL.shadow.normalBias=.03;scene.add(sunL,sunL.target);
+  world.hemi=hemi;world.sun=sunL;
+
+  /* camera */
+  camera=new THREE.OrthographicCamera(-10,10,10,-10,-200,400);
+  controls=new OrbitControls(camera,renderer.domElement);
+  controls.enableDamping=!RM;controls.dampingFactor=.09;controls.screenSpacePanning=false;
+  controls.minZoom=.75;controls.maxZoom=7;controls.minPolarAngle=.02;controls.maxPolarAngle=1.18;
+  controls.mouseButtons={LEFT:THREE.MOUSE.PAN,MIDDLE:THREE.MOUSE.DOLLY,RIGHT:THREE.MOUSE.ROTATE};
+  controls.touches={ONE:THREE.TOUCH.PAN,TWO:THREE.TOUCH.DOLLY_ROTATE};
+  controls.addEventListener('change',()=>{const t=controls.target,l=Math.hypot(t.x,t.z),m=WORLD_R;if(l>m){const f=m/l,dx=t.x*f-t.x,dz=t.z*f-t.z;t.x+=dx;t.z+=dz;camera.position.x+=dx;camera.position.z+=dz}});
+}
+
+/* ---------- camera framing ---------- */
+const HOME={phi:.95,theta:Math.PI/4,zoom:1};
+function resize(){if(!ok3d)return;const w=innerWidth,h=innerHeight,a=w/h;renderer.setSize(w,h,false);
+  const R=WORLD_R*.92;let hh=R*.8,hw=hh*a;if(hw<R*.95){hw=R*.95;hh=hw/a}
+  camera.left=-hw;camera.right=hw;camera.top=hh;camera.bottom=-hh;camera.updateProjectionMatrix()}
+addEventListener('resize',resize);
+let tw=null;const sph=new THREE.Spherical();
+function flyTo(o={}){if(!ok3d)return;sph.setFromVector3(tmpV.copy(camera.position).sub(controls.target));
+  const from={t:controls.target.clone(),phi:sph.phi,theta:sph.theta,zoom:camera.zoom,r:sph.radius};
+  const to={t:o.t?new V3(o.t.x,0,o.t.z):from.t.clone(),phi:o.phi??from.phi,theta:o.theta??from.theta,zoom:o.zoom??from.zoom};
+  let dth=to.theta-from.theta;dth=Math.atan2(Math.sin(dth),Math.cos(dth));to.theta=from.theta+dth;
+  tw={from,to,s:performance.now(),d:RM?1:(o.d||850)};controls.enabled=false}
+function stepTween(now){if(!tw)return;let k=Math.min(1,(now-tw.s)/tw.d);const e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;const {from,to}=tw;
+  controls.target.lerpVectors(from.t,to.t,e);sph.set(from.r,from.phi+(to.phi-from.phi)*e,from.theta+(to.theta-from.theta)*e);
+  camera.position.copy(controls.target).add(tmpV.setFromSpherical(sph));camera.zoom=from.zoom+(to.zoom-from.zoom)*e;camera.updateProjectionMatrix();camera.lookAt(controls.target);
+  if(k>=1){tw=null;controls.enabled=true;controls.update()}}
+/* focus a point, leaving room for the panel (right side on desktop, bottom sheet on phones) */
+function focus(x,z,zoom){if(!ok3d)return;sph.setFromVector3(tmpV.copy(camera.position).sub(controls.target));const th=sph.theta;let ox=0,oz=0;
+  const vh=(camera.top-camera.bottom)/zoom,vw=(camera.right-camera.left)/zoom,panel=view!=='map';
+  if(innerWidth<900){if(panel){const k=vh*.24/Math.max(.35,Math.cos(sph.phi));ox=Math.sin(th)*k;oz=Math.cos(th)*k}}
+  else if(panel){const k=vw*200/innerWidth;ox=Math.cos(th)*k;oz=-Math.sin(th)*k}
+  flyTo({t:{x:x+ox,z:z+oz},zoom})}
+/* nudge the archipelago a little below centre so the header never covers the far island */
+const homeT=()=>{const k=(camera.top-camera.bottom)*.1/Math.cos(HOME.phi);return{x:Math.sin(HOME.theta)*-k,z:Math.cos(HOME.theta)*-k}};
+function goHome(){bird=false;$('bird').setAttribute('aria-pressed','false');flyTo({t:homeT(),phi:HOME.phi,theta:HOME.theta,zoom:HOME.zoom})}
+const isleZoom=d=>Math.max(1.7,Math.min(3.4,WORLD_R/(d.r+3)*.95));
+
+/* ---------- islander walking across the bridges ---------- */
+const node=k=>k==='C'?CENTER:ISLES[k];
+/* points from a node's front spot, round the plaza edge, out to the bridge heading toward angle a */
+function leg(n,a,endPt){const R=n.pr+.2,pts=[],da=Math.atan2(Math.sin(a-SPOT_A),Math.cos(a-SPOT_A)),m=Math.max(1,Math.ceil(Math.abs(da)*R/.45));
+  for(let k=0;k<=m;k++){const t=SPOT_A+da*k/m;pts.push(new V3(n.x+Math.cos(t)*R,TOP,n.z+Math.sin(t)*R))}pts.push(endPt.clone().setY(TOP));return pts}
+function span(br,rev){const m=Math.ceil(br.L/.35),out=[];for(let k=0;k<=m;k++){const p=br.at(rev?1-k/m:k/m);p.y+=.07;out.push(p)}return out}
+function legsVia(br,from,to){const fa=from===br.A?br.ang:br.ang+Math.PI,rev=from!==br.A;const s=span(br,rev);
+  return [...leg(from,fa,s[0]),...s,...leg(to,fa+Math.PI,s[s.length-1]).reverse()]}
+function route(a,b){if(a===b||!ok3d)return[];
+  if(a==='C')return legsVia(world.radial[b],CENTER,ISLES[b]);
+  if(b==='C')return legsVia(world.radial[a],ISLES[a],CENTER);
+  if(NI>2){if((a+1)%NI===b)return legsVia(world.ring[a],ISLES[a],ISLES[b]);if((b+1)%NI===a)return legsVia(world.ring[b],ISLES[a],ISLES[b])}
+  return [...route(a,'C'),...route('C',b)]}
+let avAt='C',avGoal='C',avPath=[],walkGoal=null,hop=0;
+const avPos=new V3(Math.cos(SPOT_A)*(CENTER.pr+.2),TOP,Math.sin(SPOT_A)*(CENTER.pr+.2));
+function walkTo(k,club=null){walkGoal=club;
+  if(avPath.length){avPath=[...avPath,...route(avGoal,k)];avGoal=k;return}
+  avGoal=k;avPath=route(avAt,k);if(!avPath.length){arrive();return}
+  if(RM){avPos.copy(avPath[avPath.length-1]);avPath=[];arrive()}}
+function arrive(){avAt=avGoal;const n=avAt==='C'?null:ISLES[avAt];
+  if(walkGoal&&n&&walkGoal.c===n.c){const x=walkGoal;walkGoal=null;stampClub(x)}
+  else if(n){tick(`${sty(n.c)[1]} ${tx('arrived')(isn(n.c))}`,4)}
+  if(cur)renderCard()}
+function stepWalk(dt){if(!ok3d)return;const av=world.av;
+  if(avPath.length){let sp=7*dt;while(sp>0&&avPath.length){const p=avPath[0],d=avPos.distanceTo(p);if(d>1e-4){const dx=p.x-avPos.x,dz=p.z-avPos.z;if(Math.hypot(dx,dz)>1e-3)av.rotation.y=Math.atan2(dx,dz)}
+      if(d<=sp){avPos.copy(p);avPath.shift();sp-=d;if(!avPath.length)arrive()}else{avPos.lerp(p,sp/d);sp=0}}hop+=dt*14}else hop=0;
+  av.position.set(avPos.x,avPos.y+Math.abs(Math.sin(hop))*.12,avPos.z);
+  const w=avPath.length?Math.sin(hop*2)*.05:0;world.avBody.scale.set(1+w,1-w,1+w)}
+
+function stampClub(x){if(stamps[x.zh]){if(cur===x)renderCard();return}
+  stamps[x.zh]=Date.now();saveSt();
+  toast(tx('stamped')(nm(x)));tick(tx('stamped')(nm(x)),5);
+  const d=isleOf(x),total=CLUBS.filter(y=>stamps[y.zh]).length;
+  if(total===CLUBS.length){setTimeout(()=>{toast(tx('all_done')(CLUBS.length),4500);confetti()},700)}
+  else if(d&&d.L.every(y=>stamps[y.zh])){setTimeout(()=>{toast(tx('district_done')(isn(d.c)),3800);confetti()},700)}
+  updStamp();if(cur===x)renderCard();if(view!=='map')renderPanel();buildLabels()}
+function updStamp(){const n=CLUBS.filter(x=>stamps[x.zh]).length;$('stampTxt').textContent=`${n} / ${CLUBS.length}`}
+
+/* ---------- islands: select & panel ---------- */
+const isMob=()=>innerWidth<900;
+function selectIsle(d,{panel=true,walk=true,fly=true}={}){curIsle=d;
+  if(panel){view='isle';setNav();$('panel').hidden=false;document.body.classList.add('paneled');renderPanel();$('pbody').scrollTop=0;if(isMob()){$('ccard').hidden=true;document.body.classList.remove('carded')}}
+  if(fly)focus(d.x,d.z,isleZoom(d));
+  if(walk&&avGoal!==d.i)walkTo(d.i);
+  renderChips();buildLabels();updSel()}
+function updSel(){if(!ok3d)return;const s=world.sel;if(curIsle){s.visible=true;s.position.set(curIsle.x,.05,curIsle.z);s.scale.setScalar(curIsle.r*1.5);s.material.color.set(sty(curIsle.c)[0])}else s.visible=false}
+function goChapel(){curIsle=null;closePanel();focus(0,0,2.4);walkTo('C');toast(tx('chapel_t'),3600);renderChips();buildLabels();updSel()}
+
+/* ---------- club card ---------- */
+let diceMode=false;
+function select(x,{dice=false}={}){cur=x;diceMode=dice;const d=isleOf(x);curIsle=d;
+  if(isMob()){$('panel').hidden=true;document.body.classList.remove('paneled')}
+  if(ok3d)focus(d.x,d.z,isleZoom(d));
+  if(!stamps[x.zh])walkTo(d.i,x);
+  renderCard();$('ccard').hidden=false;document.body.classList.add('carded');renderChips();buildLabels();updSel()}
+function deselect(){cur=null;$('ccard').hidden=true;document.body.classList.remove('carded');
+  if(isMob()&&view!=='map'){$('panel').hidden=false;document.body.classList.add('paneled');renderPanel()}}
+function renderCard(){const x=cur;if(!x)return;const [col,e]=sty(x.c),st=stamps[x.zh],going=!st&&walkGoal===x&&avPath.length;
+  $('ck').hidden=!diceMode;$('ck').textContent=tx('dice_k');
+  $('cb').innerHTML=`<span class="pill" style="--c:${col}">${e} ${E(isn(x.c))}${x.g?' · '+E(gn(x.g)):''}</span><h2>${E(nm(x))}</h2><p class="en">${E(nm2(x))}</p>
+  <p class="status${st?' ok':''}">${st?E(tx('st_ok')(fmtT(st))):going?tx('st_go'):tx('st_no')}</p>${x.k?'':`<p class="note">${tx('nopage')}</p>`}`;
+  const a=$('cl');a.href=x.u||'https://club.thu.edu.tw/';a.textContent=x.k?tx('full'):tx('site');
+  $('cf').textContent=fav.has(x.zh)?tx('saved'):tx('save');$('cw').textContent=tx('walk');$('cw').hidden=!!st||!!going}
+
+/* ---------- island name signs (HTML, projected) ---------- */
+const lbl=$('lbl');let iEls=[],chEl=null;
+function buildLabels(){lbl.innerHTML='';if(!ok3d)return;
+  iEls=ISLES.map(d=>{const el=document.createElement('button');const [col,ic]=sty(d.c),m=d.L.filter(x=>stamps[x.zh]).length,h=q?d.L.filter(ok).length:0;
+    el.className='il'+(curIsle===d?' sel':'')+(q&&!h?' dim':'')+(m===d.L.length?' full':'');el.style.setProperty('--c',col);
+    el.innerHTML=`<span class="ic">${ic}</span><span>${E(isn(d.c))}<small>${tx('clubs')(d.L.length)} · ${tx('stampsOf')(m,d.L.length)}${h?`<span class="hit">${tx('hits')(h)}</span>`:''}</small></span>`;
+    el.onclick=()=>selectIsle(d);lbl.appendChild(el);return{el,d}});
+  chEl=document.createElement('button');chEl.className='il ch'+(q?' dim':'');chEl.style.setProperty('--c','#E39A4A');chEl.innerHTML=`<span class="ic">⛪</span><span>${E(tx('chapel'))}<small>${E(tx('chapel_s'))}</small></span>`;chEl.onclick=goChapel;lbl.appendChild(chEl)}
+const pv=new V3();
+function proj(x,y,z){pv.set(x,y,z).project(camera);return[(pv.x+1)/2*innerWidth,(1-pv.y)/2*innerHeight]}
+function placeLabels(){if(!ok3d)return;const W=innerWidth,H=innerHeight;lbl.classList.toggle('cmp',isMob()&&camera.zoom<1.6);
+  const put=(el,x,y,z)=>{const [sx,sy]=proj(x,y,z);const on=sx>-120&&sx<W+120&&sy>-20&&sy<H+60;el.style.visibility=on?'visible':'hidden';if(on)el.style.transform=`translate(${sx}px,${sy-16}px) translate(-50%,-100%)`};
+  iEls.forEach(({el,d})=>put(el,d.x,TOP+d.top+.2,d.z));if(chEl)put(chEl,0,TOP+4.8,0)}
+
+/* ---------- time of day ---------- */
+const KF=[[0,'#24305A','#8FA6E8',.25,.45,'#1F3B63',1],[5,'#34396A','#9AA6E0',.28,.48,'#284873',1],[6.3,'#F7C8B0','#FFC8A0',.7,.62,'#8FC3CF',.4],[8,'#BDE5F4','#FFF6E6',1.15,.85,'#5FC4D6',0],[16,'#BDE5F4','#FFF6E6',1.15,.85,'#5FC4D6',0],[17.8,'#F8CF96','#FFB878',.95,.68,'#7DB9C4',.25],[19.2,'#9A88C2','#C2A4E8',.5,.55,'#4E73A0',.85],[20.6,'#303D69','#93A9EA',.3,.5,'#24426B',1],[24,'#24305A','#8FA6E8',.25,.45,'#1F3B63',1]];
+let hour=8;
+function applyTime(h){hour=h;const hh=Math.floor(h),mm=Math.round((h-hh)*60);$('tv').textContent=`${String(hh).padStart(2,'0')}:${String(mm%60).padStart(2,'0')}`;
+  if(!ok3d)return;let i=0;while(i<KF.length-2&&KF[i+1][0]<=h)i++;const a=KF[i],b=KF[i+1],k=(h-a[0])/(b[0]-a[0]);
+  const sky=C(a[1]).lerp(C(b[1]),k),sun=C(a[2]).lerp(C(b[2]),k),si=a[3]+(b[3]-a[3])*k,am=a[4]+(b[4]-a[4])*k,wat=C(a[5]).lerp(C(b[5]),k),glow=a[6]+(b[6]-a[6])*k;
+  scene.background=sky;world.sun.color.copy(sun);world.sun.intensity=si;world.hemi.intensity=am;world.hemi.color.copy(C('#ffffff').lerp(sky,.35));world.water.material.color.copy(wat);
+  world.MT.shallow.color.copy(wat).lerp(C('#ffffff'),.4*(1-glow*.75));world.MT.foam.color.copy(C('#ffffff').lerp(wat,glow*.5));
+  const day=h>=6&&h<=19.5;const ang=day?((h-6)/13.5)*Math.PI:Math.PI*.35;world.sun.position.set(Math.cos(ang)*-30+8,Math.max(10,Math.sin(ang)*40),day?18:-20);
+  world.MT.win.color.copy(C('#4E6470').lerp(C('#FFD27A'),glow));world.MT.glass.emissive.copy(C('#000000').lerp(C('#E9A74A'),glow*.55));
+  world.clouds.forEach(c=>c.children.forEach(s=>s.material.color.copy(C('#ffffff').lerp(sky,.45))));
+  document.querySelector('meta[name=theme-color]').content='#'+sky.getHexString();
+  $('splash').style.background='#'+sky.getHexString()}
+let playing=false,lastEv=-1;
+function tm2h(){return +$('tm').value/60}
+$('tm').oninput=()=>{applyTime(tm2h());evCheck()};
+$('play').onclick=()=>{playing=!playing;$('play').textContent=playing?'❚❚':'▶'};
+function evCheck(){const ev=tx('events');let j=-1;ev.forEach((e,i)=>{if(hour>=e[0])j=i});if(j!==lastEv){lastEv=j;if(j>=0)tick(ev[j][1],5)}}
+
+/* ---------- picking ---------- */
+const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
+function hit(cx,cy){ndc.set(cx/innerWidth*2-1,-(cy/innerHeight)*2+1);ray.setFromCamera(ndc,camera);const hs=ray.intersectObjects(pick,true);
+  for(const h of hs){let o=h.object;while(o){if(o.userData.chapel)return{chapel:1};if(o.userData.isle!=null)return{isle:ISLES[o.userData.isle]};o=o.parent}}return null}
+let down=null;
+if(ok3d){const el=renderer.domElement;
+  el.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,t:performance.now()}});
+  el.addEventListener('pointerup',e=>{if(!down)return;const d=Math.hypot(e.clientX-down.x,e.clientY-down.y),dt=performance.now()-down.t;down=null;if(d>7||dt>600)return;
+    const h=hit(e.clientX,e.clientY);if(!h)return;if(h.chapel)goChapel();else if(h.isle)selectIsle(h.isle)});
+  el.addEventListener('pointercancel',()=>down=null);
+  let hv=0;el.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||e.buttons)return;const n=performance.now();if(n-hv<60)return;hv=n;el.style.cursor=hit(e.clientX,e.clientY)?'pointer':'grab'});
+}
+addEventListener('keydown',e=>{if(e.key==='Escape'){if(cur)deselect();else closePanel()}});
+
+/* ---------- chips, search, dice ---------- */
+function renderChips(){$('chips').innerHTML=ISLES.map(d=>{const [col,ic]=sty(d.c),h=q?d.L.filter(ok).length:d.L.length;
+  return `<button class="chip${q&&!h?' off':''}" data-isle="${d.i}" aria-pressed="${curIsle===d}"><i style="background:${col}">${ic}</i>${E(isn(d.c))}<small>${h}</small></button>`}).join('')}
+function updCount(){const n=CLUBS.filter(ok).length;$('cnt').hidden=!q;$('cnt').textContent=tx('lit')(n)}
+$('q').addEventListener('input',e=>{q=e.target.value.trim().toLowerCase();$('qx').hidden=!q;renderChips();updCount();buildLabels();if(view==='list'||view==='isle')renderPanel();
+  if(q){const hits=ISLES.filter(d=>d.L.some(ok));if(hits.length===1&&view==='map')focus(hits[0].x,hits[0].z,isleZoom(hits[0]))}});
+$('qx').onclick=()=>{$('q').value='';$('q').dispatchEvent(new Event('input'));$('q').focus()};
+let rolling=false;
+$('dice').onclick=()=>{if(rolling)return;const L=CLUBS.filter(ok);if(!L.length){toast(tx('none'));return}const f=L[Math.random()*L.length|0];
+  if(RM||!ok3d){select(f,{dice:true});return}
+  if(cur)deselect();rolling=true;let n=0;const id=setInterval(()=>{iEls.forEach(t=>t.el.classList.remove('roll'));const d=n>=11?isleOf(f):ISLES[Math.random()*NI|0];const t=iEls.find(t=>t.d===d);t&&t.el.classList.add('roll');
+    if(++n>12){clearInterval(id);rolling=false;setTimeout(()=>select(f,{dice:true}),250)}},110)};
+$('bird').onclick=()=>{bird=!bird;$('bird').setAttribute('aria-pressed',bird);flyTo(bird?{phi:.03}:{phi:HOME.phi})};
+$('home').onclick=()=>{if(cur)deselect();closePanel();curIsle=null;renderChips();buildLabels();updSel();goHome()};
+$('stampBtn').onclick=()=>go('log');
+
+/* ---------- panels ---------- */
+const heart=z=>`<button class="heart" data-f="${E(z)}" aria-pressed="${fav.has(z)}" aria-label="${E(tx('save'))} ${E(nm(by[z]))}">${fav.has(z)?'♥':'♡'}</button>`;
+const row=x=>`<li style="--c:${sty(x.c)[0]}"><button class="row" data-z="${E(x.zh)}"><b>${E(nm(x))}${stamps[x.zh]?'<span class="ok">✓</span>':''}</b><small>${E(nm2(x))}</small></button>${heart(x.zh)}</li>`;
+const rowsOf=L=>{if(L.some(x=>x.g)){const gs=[...new Set(L.map(x=>x.g||''))];return gs.map(g=>`<h4>${g?E(gn(g)):tx('other')}</h4><ul class="rows">${L.filter(x=>(x.g||'')===g).map(row).join('')}</ul>`).join('')}return`<ul class="rows">${L.map(row).join('')}</ul>`};
+let resetArm=false;
+function renderPanel(){const b=$('pbody');resetArm=false;$('panel').style.removeProperty('--c');
+  if(view==='isle'&&curIsle){const d=curIsle,[col,ic]=sty(d.c),m=d.L.filter(x=>stamps[x.zh]).length,p=Math.round(m/d.L.length*100),L=d.L.filter(ok);
+    $('panel').style.setProperty('--c',col);
+    $('ph').innerHTML=`<span class="ic">${ic}</span><span>${E(isn(d.c))}<small>${E(cn(d.c))} · ${tx('clubs')(d.L.length)}</small></span>`;
+    b.innerHTML=`<p class="tagl">${E(tagl(d.c))}</p><div class="prog"><div class="pr" style="--c:${col}"><span>🏅</span><span class="bar"><i style="width:${p}%"></i></span><small>${m}/${d.L.length}</small></div></div>
+      ${L.length?rowsOf(L):`<p class="empty">${tx('none')}</p>`}`}
+  if(view==='list'){$('ph').textContent=tx('listh');const h=ISLES.map(d=>{const L=d.L.filter(ok);if(!L.length)return'';
+      return`<section class="grp" style="--c:${sty(d.c)[0]}"><h3><button data-isle="${d.i}">${sty(d.c)[1]} ${E(isn(d.c))}</button></h3>${rowsOf(L)}</section>`}).join('');
+    b.innerHTML=(h||`<p class="empty">${tx('none')}</p>`)+`<p class="foot">${tx('foot')(CLUBS.length)}</p>`}
+  if(view==='fav'){$('ph').textContent=tx('favh');const L=[...fav].map(z=>by[z]).filter(Boolean);
+    b.innerHTML=L.length?`<p style="margin:0 6px 10px;color:var(--mut)">${tx('favp')}</p><ul class="rows">${L.map(row).join('')}</ul><div class="acts"><button class="btn" id="copy">${tx('copy')}</button></div><textarea id="copyT" hidden readonly style="width:100%;margin-top:10px;height:120px;font:inherit"></textarea>`:`<div class="empty"><div class="face">•ᴗ•</div><p>${tx('fave')}</p></div>`}
+  if(view==='log'){$('ph').textContent=tx('logh');const n=CLUBS.filter(x=>stamps[x.zh]).length;
+    const rec=Object.entries(stamps).filter(([z])=>by[z]).sort((a,b)=>b[1]-a[1]).slice(0,30);
+    b.innerHTML=`<div class="big"><b>${n}</b><span>${tx('logp')(n,CLUBS.length)}</span></div><div class="prog">${ISLES.map(d=>{const m=d.L.filter(x=>stamps[x.zh]).length,p=Math.round(m/d.L.length*100);return`<button class="pr" data-isle="${d.i}" style="--c:${sty(d.c)[0]}"><span>${sty(d.c)[1]} ${E(isn(d.c))}</span><span class="bar"><i style="width:${p}%"></i></span><small>${m}/${d.L.length}</small></button>`}).join('')}</div>
+    <div class="grp"><h3>${tx('recent')}</h3>${rec.length?`<ul class="log">${rec.map(([z,t])=>`<li><button data-z="${E(z)}"><time>${fmtT(t)}</time><span>${E(nm(by[z]))}</span></button></li>`).join('')}</ul>`:`<p class="empty" style="padding:12px">${tx('loge')}</p>`}</div>
+    ${n?`<div class="acts"><button class="btn g" id="reset">${tx('reset')}</button></div>`:''}`}}
+function setNav(){const v=view==='isle'?'map':view;document.querySelectorAll('nav.tab button').forEach(b=>b.dataset.v===v?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'))}
+function go(v){if(v==='map'){if(cur)deselect();closePanel();return}
+  view=v;setNav();if(isMob()){$('ccard').hidden=true;document.body.classList.remove('carded')}$('panel').hidden=false;document.body.classList.add('paneled');renderPanel();$('pbody').scrollTop=0}
+function closePanel(){$('panel').hidden=true;document.body.classList.remove('paneled');if(view!=='map'){if(view==='isle'){curIsle=cur?curIsle:null;renderChips();buildLabels();updSel()}view='map';setNav()}}
+document.querySelector('nav.tab').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.v===view&&view!=='map'){closePanel();return}go(b.dataset.v)});
+document.addEventListener('click',async e=>{const T=e.target;let b;
+  if(b=T.closest('[data-close]')){b.dataset.close==='card'?deselect():(ok3d?closePanel():0)}
+  else if(b=T.closest('.heart')){const z=b.dataset.f;fav.has(z)?fav.delete(z):fav.add(z);saveFav();if(view==='fav')renderPanel();else{b.setAttribute('aria-pressed',fav.has(z));b.textContent=fav.has(z)?'♥':'♡'}if(cur&&cur.zh===z)renderCard()}
+  else if(b=T.closest('[data-z]')){const x=by[b.dataset.z];if(x)select(x)}
+  else if(b=T.closest('[data-isle]')){const d=ISLES[+b.dataset.isle];if(d){if(cur)deselect();selectIsle(d)}}
+  else if(T.closest('#reset')){const r=$('reset');if(!resetArm){resetArm=true;r.textContent=tx('reset2');r.classList.replace('g','c')}else{stamps={};saveSt();updStamp();renderPanel();buildLabels()}}
+  else if(T.closest('#copy')){const txt=tx('copyhdr')+[...fav].map(z=>nm(by[z])).join('\n');try{await navigator.clipboard.writeText(txt);$('copy').textContent=tx('copied')}catch(err){const ta=$('copyT');ta.hidden=false;ta.value=txt;ta.focus();ta.select();$('copy').textContent=tx('copyfail')}}});
+$('cf').onclick=()=>{const z=cur.zh;fav.has(z)?fav.delete(z):fav.add(z);saveFav();renderCard();if(view!=='map')renderPanel()};
+$('cw').onclick=()=>{if(cur){walkTo(isleOf(cur).i,cur);renderCard()}};
+
+/* ---------- tour ---------- */
+let si=0;const step=()=>{const st=tx('steps')(CLUBS.length);$('th').textContent=st[si][0];$('tp').textContent=st[si][1];$('next').textContent=si<2?tx('next'):tx('go');[...$('tdots').children].forEach((d,i)=>d.classList.toggle('on',i===si))};
+const endTour=()=>{$('tour').close();LS.set('club-tour-isles','1')};
+$('next').onclick=()=>{si<2?(si++,step()):endTour()};$('skip').onclick=endTour;
+$('help').onclick=()=>{si=0;step();$('tour').showModal()};
+
+/* ---------- language ---------- */
+function applyLang(){const e=LG==='en';document.documentElement.lang=e?'en':'zh-Hant';document.title=tx('title');
+  document.querySelectorAll('[data-k]').forEach(n=>n.textContent=tx(n.dataset.k));
+  $('ttl').innerHTML=tx('h1');$('q').placeholder=tx('ph');$('q').setAttribute('aria-label',tx('ph'));
+  document.querySelectorAll('.langbtn').forEach(b=>b.textContent=e?'中文':'EN');
+  $('sem').textContent=tx('sem')(SY,STm);renderChips();updCount();step();buildLabels();if(ok3d)world.redrawSigns();if(cur)renderCard();if(view!=='map')renderPanel();lastEv=-1;evCheck()}
+document.addEventListener('click',e=>{if(e.target.closest('.langbtn')){LG=LG==='en'?'zh':'en';LS.set('club-lang',LG);applyLang()}});
+
+/* ---------- loop ---------- */
+let last=performance.now(),cardWalk=false;
+function loop(now){requestAnimationFrame(loop);if(document.hidden)return;const dt=Math.min(.05,(now-last)/1000);last=now;
+  if(playing){let m=+$('tm').value+dt*36;if(m>1439)m=360;$('tm').value=m;applyTime(m/60);evCheck()}
+  stepTween(now);if(!tw)controls.update();
+  stepWalk(dt);
+  const w=!!(cur&&walkGoal===cur&&avPath.length);if(w!==cardWalk){cardWalk=w;renderCard()}
+  if(!RM){const t=now/1000;world.MT.foam.opacity=.45+Math.sin(t*1.4)*.2;
+    world.waveData.forEach((d,i)=>{tmpM.compose(tmpV.set(d.x+Math.sin(t*.3+d.p)*.4,.02,d.z),tmpQ.setFromEuler(tmpE.set(0,.6,0)),tmpS.setScalar(.5+.5*Math.sin(t*d.s+d.p)));world.waves.setMatrixAt(i,tmpM)});world.waves.instanceMatrix.needsUpdate=true;
+    const ba=t*.03,br=WORLD_R+2;world.boat.position.set(Math.cos(ba)*br,Math.sin(t*2)*.04,Math.sin(ba)*br);world.boat.rotation.set(Math.sin(t*1.7)*.05,-ba,0);
+    world.clouds.forEach((c,i)=>{c.position.x+=dt*(.35+i*.05);if(c.position.x>WORLD_R*1.3)c.position.x=-WORLD_R*1.3});
+    (world.fires||[]).forEach((f,i)=>{f.scale.set(1,1+Math.sin(t*9+i*2)*.15,1)});
+    if(world.sel.visible){world.sel.material.opacity=.55+Math.sin(t*3)*.35}}
+  renderer.render(scene,camera);placeLabels()}
+
+/* ---------- boot ---------- */
+saveFav();updStamp();
+const now=new Date();let h0=now.getHours()+now.getMinutes()/60;if(h0<6)h0=23;
+$('tm').value=Math.round(h0*60/5)*5;
+if(ok3d){resize();
+  sph.set(80,HOME.phi,HOME.theta);camera.position.setFromSpherical(sph);camera.lookAt(0,0,0);camera.zoom=1;camera.updateProjectionMatrix();controls.update();
+  if(!RM){camera.zoom=.78;camera.updateProjectionMatrix();sph.set(80,1.12,HOME.theta-.9);camera.position.setFromSpherical(sph);controls.update();setTimeout(()=>flyTo({t:homeT(),phi:HOME.phi,theta:HOME.theta,zoom:1,d:1600}),350)}else{const t=homeT();controls.target.set(t.x,0,t.z);camera.position.add(new V3(t.x,0,t.z));controls.update()}
+  world.av.position.copy(avPos);
+  applyTime(tm2h());
+  requestAnimationFrame(loop);
+}else{$('nogl').hidden=false;$('nogl').textContent='這台裝置無法顯示 3D 群島，先用清單瀏覽所有社團。';$('tools').hidden=true;$('clock').hidden=true;applyTime(tm2h())}
+applyLang();
+tick(tx('tips')[0],6);
+setTimeout(()=>$('splash').classList.add('out'),RM?0:700);
+if(!ok3d)go('list');
+if(!LS.get('club-tour-isles',''))setTimeout(()=>$('help').click(),RM?300:2300);
+</script>
+</body></html>
