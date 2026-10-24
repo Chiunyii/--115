@@ -691,10 +691,35 @@ if(ok3d){
   function decorate(d,bridgeAngles,col){const placed=[],N=Math.round(d.r*2.4),flc=[col,'#FFFDF6','#F7D54E','#F28C9E',col];
     for(let k=0;k<N*8&&placed.length<N;k++){const a=hash(d.seed+'a'+k)*Math.PI*2,edge=rad(d,a)*.86,r0=d.pr+1.0;if(edge<r0+.2)continue;
       const r=r0+hash(d.seed+'r'+k)*(edge-r0);if(bridgeAngles.some(b=>angOff(a,b)<.34))continue;
-      const x=d.x+Math.cos(a)*r,z=d.z+Math.sin(a)*r;if(placed.some(p=>Math.hypot(p[0]-x,p[1]-z)<1.25))continue;placed.push([x,z]);
+      const x=d.x+Math.cos(a)*r,z=d.z+Math.sin(a)*r;if(placed.some(p=>Math.hypot(p[0]-x,p[1]-z)<1.25)||(d.keepOut||[]).some(o=>Math.hypot(o.x-x,o.z-z)<o.r))continue;placed.push([x,z]);
       const t=hash(d.seed+'t'+k),front=angOff(a,SPOT_A)<.75;
       if(front||t>.8)flowers(x,z,flc[k%flc.length],d.seed+k);else if(t<.45)tree(x,z,.72+hash(d.seed+'s'+k)*.35,t);else if(t<.62)cedar(x,z,.85+hash(d.seed+'c'+k)*.3);else if(t<.72)bush(x,z,.9,'#5FA552');else rock(x,z,.9)}
     [SPOT_A+.62,SPOT_A-.62].forEach(a=>lamp(d.x+Math.cos(a)*(d.pr+.85),d.z+Math.sin(a)*(d.pr+.85)))}
+
+  /* a hill with a spiral trail on Athletics Isle, for the mountaineering club: hikers go up and down, one waves from the top */
+  function mountain(g,d,ang){
+    let A=SPOT_A+Math.PI,best=-1;for(let k=-26;k<=26;k++){const a=SPOT_A+Math.PI+k*.05,m=Math.min(...ang.map(b=>angOff(a,b)));if(m>best){best=m;A=a}}
+    const base=1.7,R=Math.max(d.pr+.4+base,rad(d,A)*.93-base),cx=Math.cos(A)*R,cz=Math.sin(A)*R;
+    d.keepOut=[{x:d.x+cx,z:d.z+cz,r:base+.9}];
+    const K=1.3,prof=[[1.7,0],[1.6,.35],[1.25,1.1],[.85,1.8],[.45,2.45],[.15,2.85],[0,2.9]].map(([r,y])=>[r,y*K]);
+    const rAt=y=>{for(let i=1;i<prof.length;i++){const [r0,y0]=prof[i-1],[r1,y1]=prof[i];if(y<=y1)return r0+(r1-r0)*(y-y0)/(y1-y0)}return 0};
+    const m=new THREE.Group();m.position.set(cx,TOP,cz);g.add(m);
+    const lathe=(pts,col)=>mesh(new THREE.LatheGeometry(pts.map(([r,y])=>new THREE.Vector2(r,y)),28),col,0,0,0,m);
+    lathe(prof,'#6FB45A');lathe(prof.filter(p=>p[1]>=1.8*K).map(([r,y])=>[r+.04,y]),'#A9A49A');
+    lathe([[rAt(2.45*K)+.06,2.45*K],[.3,2.66*K],[.15,2.86*K],[0,2.93*K]],'#FFFDF6');
+    /* trail: a helix of dirt steps from the foot to the summit */
+    const turns=1.6,a0=Math.atan2(-cz,-cx)+.4;
+    const P=(s,off=.05)=>{const y=.04+s*2.72*K,r=rAt(y)+off,a=a0+s*turns*Math.PI*2;return new V3(Math.cos(a)*r,y,Math.sin(a)*r)};
+    const n=56;for(let k=0;k<n;k++){const s=(k+.5)/n,p=P(s,.07),q=P(Math.min(1,s+.01),.07).sub(P(Math.max(0,s-.01),.07));const st=new THREE.Mesh(G.cbox,lam('#C9A271'));st.castShadow=true;st.matrix.copy(basisM(p,q,.48,.2,.32));st.matrixAutoUpdate=false;st.receiveShadow=true;m.add(st)}
+    for(let k=0;k<5;k++){const a=k*1.3+.7,y=(.3+k*.28)*K,r=rAt(y);[0,1,2].forEach(j=>mesh(new THREE.ConeGeometry((.36-j*.1),.4,8).translate(0,.2,0),j%2?'#3F8F5B':'#4C9F65',Math.cos(a)*(r+.05),y+j*.22,Math.sin(a)*(r+.05),m))}
+    Cy(m,'#6B5B4B',.025,.7,0,2.88*K,0);B(m,'#F4C95D',.38,.24,.02,.19,2.88*K+.44,0);
+    /* hikers with backpacks walk the trail, turning round at the top and bottom */
+    const hk=[['#E8506A','#2F6FB0'],['#5FBFA8','#F2A65A']].map(([sh,pk],i)=>{const p=person(m,{shirt:sh,hair:i?'#2B2F33':'#8A5A36',cap:i?'#F4C95D':null,s:.62});B(p.g,pk,.32,.36,.18,0,.26,-.24);const pole=Cy(p.arms[1],'#6B5B4B',.015,.5,0,-.75,.05);return p});
+    const top=person(m,{x:.12,y:2.86*K,z:.05,ry:SPOT_A-A,shirt:'#F28C72',hair:'#5A3B2B',s:.62});
+    anim(t=>{hk.forEach((p,i)=>{const w=(t*.045+i*.5)%1,up=w<.5,s=up?w*2:2-w*2,pos=P(Math.min(.97,Math.max(.03,s)),.12);p.g.position.copy(pos);
+        const q=P(Math.min(1,s+.01)).sub(P(Math.max(0,s-.01)));if(!up)q.negate();p.g.rotation.y=Math.atan2(q.x,q.z);
+        const sw=Math.sin(t*9+i);p.legs[0].rotation.x=sw*.5;p.legs[1].rotation.x=-sw*.5;p.arms[0].rotation.x=-sw*.4;p.arms[1].rotation.x=sw*.4-.3});
+      top.arms[0].rotation.x=-2.6+Math.sin(t*6)*.4;top.arms[1].rotation.x=-2.6-Math.sin(t*6)*.4;top.g.position.y=2.86*K+Math.abs(Math.sin(t*3))*.05})}
 
   /* ---------- bridges ---------- */
   const bridges=[];
@@ -731,6 +756,7 @@ if(ok3d){
     const toC=Math.atan2(-d.z,-d.x),ang=[toC];if(NI>2){const nx=ISLES[(i+1)%NI],pv=ISLES[(i-1+NI)%NI];ang.push(Math.atan2(nx.z-d.z,nx.x-d.x),Math.atan2(pv.z-d.z,pv.x-d.x))}
     d.bridgeAngles=ang;plaza(g,{...d},col,ang.map(a=>a));
     const bg=new THREE.Group();bg.position.set(0,TOP,0);bg.rotation.y=FACE;g.add(bg);d.top=(BUILD[kind]||BUILD.cottage)(bg,d,col);
+    if(d.c==='體能性')mountain(g,d,ang);
     decorate(d,ang,col)});
   decorate(CENTER,centerAngles,'#F2A65A');
   world.radial=ISLES.map(d=>bridge(CENTER,d));
