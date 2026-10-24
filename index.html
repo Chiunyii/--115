@@ -40,6 +40,8 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:900;margin:0;text-wrap:balance}
 .il.ch{padding-right:12px;font-size:13.5px}
 .il.ch .ic{width:26px;height:26px;font-size:14px}
 .il.roll{background:var(--sun)}
+.il.sea{font-size:12.5px;padding:3px 10px 3px 3px}
+.il.sea::after{height:10px}
 #lbl.cmp .il{font-size:12.5px;padding:3px 10px 3px 3px;gap:5px}
 #lbl.cmp .il small{display:none}
 #lbl.cmp .il .ic{width:24px;height:24px;font-size:13px}
@@ -292,7 +294,7 @@ const TX={zh:{
  clubs:n=>`${n} 個社團`,stampsOf:(m,t)=>`🏅 ${m}/${t}`,
  sem:(y,s)=>`${y} 學年度第 ${s} 學期`,
  foot:n=>`資料來源：課外活動暨學生發展組，共 ${n} 個社團。完整介紹請見 <a href="https://club.thu.edu.tw/" target="_blank" rel="noopener">東海大學社團總覽網站</a>。`,
- tips:['點一座島，看看島上住了哪些社團','拖曳移動地圖，兩指縮放或旋轉','每座島的顏色和建築，代表一種社團類型','拉動下方時間軸，看看島上的一天','按 🎲，讓島嶼替你挑一個社團','集滿一座島的章，會解鎖那座島的成就'],
+ tips:['點一座島，看看島上住了哪些社團','拖曳移動地圖，兩指縮放或旋轉','每座島的顏色和建築，代表一種社團類型','拉動下方時間軸，看看島上的一天','按 🎲，讓島嶼替你挑一個社團','集滿一座島的章，會解鎖那座島的成就','體能島外海有人在游泳和潛水，點他們看看是哪個社團'],
  events:[[6,'清晨，相思林裡的鳥先醒了'],[8,'第一堂課，橋上都是趕課的人'],[12,'午餐時間，社團攤位前最熱鬧'],[15,'下午，體能島的球聲沒停過'],[18,'傍晚，社辦的燈一盞盞亮起'],[19.5,'社課時間，群島最熱鬧的時候'],[22,'夜深了，藝術島還有人在練團']],
  steps:n=>[['歡迎登上東海大學社團島！',`${n} 個社團依類型住在 7 座小島上，小島之間有橋相連，中間是路思義教堂。`],['點一座島，看看島上有誰','點小島或上方的島名，就會打開那座島的社團清單。點一個社團，•ᴗ• 會走過橋去幫你蓋章。'],['不知道從哪裡開始？','按 🎲 讓島嶼替你抽一個，或用搜尋找出有符合社團的小島。拉動時間軸，看島上從清晨到深夜。']]
 },en:{
@@ -311,7 +313,7 @@ const TX={zh:{
  clubs:n=>`${n} clubs`,stampsOf:(m,t)=>`🏅 ${m}/${t}`,
  sem:(y,s)=>`Academic Year ${+y+1911}–${String((+y+1912)%100).padStart(2,'0')}, Semester ${s}`,
  foot:n=>`Source: Extracurricular Activities and Student Development Division, ${n} clubs. For full details see the <a href="https://club.thu.edu.tw/" target="_blank" rel="noopener">Tunghai University club website</a>.`,
- tips:['Tap an island to see who lives there','Drag to move, pinch to zoom or rotate','Each island’s colour and building stands for one club type','Slide the clock to watch a day on the islands','Tap 🎲 and let the islands pick a club','Collect every stamp on an island to complete it'],
+ tips:['Tap an island to see who lives there','Drag to move, pinch to zoom or rotate','Each island’s colour and building stands for one club type','Slide the clock to watch a day on the islands','Tap 🎲 and let the islands pick a club','Collect every stamp on an island to complete it','Someone is swimming and diving off Athletics Isle. Tap them to meet their club'],
  events:[[6,'Dawn. The birds in the acacia grove wake first'],[8,'First class. The bridges fill with students'],[12,'Lunch. Club booths are at their busiest'],[15,'Afternoon. The courts on Athletics Isle never go quiet'],[18,'Evening. Club room lights come on one by one'],[19.5,'Club meeting time, the liveliest hour'],[22,'Late night. Someone on Arts Isle is still rehearsing']],
  steps:n=>[['Welcome to Tunghai Club Islands!',`${n} clubs live on 7 islands, one per club type. Bridges join the islands, with Luce Chapel in the middle.`],['Tap an island to meet its clubs','Tap an island or its name at the top to open its club list. Pick a club and •ᴗ• walks across the bridges to stamp it.'],['Not sure where to start?','Tap 🎲 to let the islands pick, or search to find which islands have a match. Slide the clock to watch the islands from dawn to midnight.']]
 }};
@@ -644,6 +646,52 @@ if(ok3d){
   world.clouds=[];for(let i=0;i<7;i++){const g=new THREE.Group();for(let j=0;j<3;j++){const s=new THREE.Mesh(G.sphc,new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:.93}));const k=1.6+hash('c'+i+j)*1.6;s.scale.set(k*1.2,k*.8,k);s.position.set(j*1.3-1.3,0,(hash('cz'+i+j)-.5));g.add(s)}
     g.position.set((hash('cx'+i)-.5)*WORLD_R*2.4,10+hash('cy'+i)*3,(hash('cz'+i)-.5)*WORLD_R*2.4);scene.add(g);world.clouds.push(g)}
 
+  /* swimmers (水上活動社) and a free-diver (自由潛水社) in the sea off Athletics Isle; tapping one opens that club */
+  world.seaTick=()=>{};
+  const ath=ISLES.find(d=>d.c==='體能性');
+  if(ath){
+    const out=ath.a,er=rad(ath,out),at=(r,side)=>new V3(ath.x+Math.cos(out)*r-Math.sin(out)*side,0,ath.z+Math.sin(out)*r+Math.cos(out)*side);
+    const tag=(g,club)=>{if(club){g.userData.club=club;pick.push(g)}scene.add(g);return g};
+    const ripple=g=>{const m=new THREE.Mesh(new THREE.RingGeometry(.42,.52,28).rotateX(-Math.PI/2),MT.foam);m.position.y=.03;m.renderOrder=3;g.add(m);return m};
+    const swimmer=(cap,suit,ringed)=>{const g=new THREE.Group();g.scale.setScalar(1.2);
+      Sp(g,'#F7D7BE',.5,.46,.48,0,.16,0);mesh(new THREE.SphereGeometry(.26,16,8,0,Math.PI*2,0,Math.PI*.55),cap,0,.17,-.01,g);
+      [-.08,.08].forEach(x=>Sp(g,'#2B3A55',.12,.08,.05,x,.17,.235));
+      Sp(g,suit,.52,.3,.85,0,-.06,-.42);
+      const arms=[-1,1].map(s=>{const p=new THREE.Group();p.position.set(s*.24,0,-.12);mesh(new THREE.CylinderGeometry(.065,.06,.52,8).translate(0,.26,0),'#F7D7BE',0,0,0,p);g.add(p);return p});
+      const kick=[-1,1].map(s=>{const m=new THREE.Mesh(G.sphc,MT.foam);m.position.set(s*.12,.04,-1.0);m.renderOrder=3;g.add(m);return m});
+      if(ringed)mesh(new THREE.TorusGeometry(.42,.11,8,24).rotateX(Math.PI/2),new THREE.MeshLambertMaterial({map:stripeTex('#E8506A')}),0,.02,-.2,g);
+      return {g,arms,kick,rip:ripple(g)}};
+    const sw=[swimmer('#F4C95D','#2F6FB0',false),swimmer('#E8506A','#1F8A70',false),swimmer('#5FBFA8','#F28C72',true)];
+    const loops=[{c:at(er*1.4,-2.3),R:1.15,w:.34,ph:0},{c:at(er*1.4,-2.3),R:1.15,w:.34,ph:Math.PI},{c:at(er*1.3,2.9),R:.45,w:.15,ph:1}];
+    sw.forEach(s=>tag(s.g,by['水上活動社']));
+    /* free-diver with mask and snorkel, and the red-and-white dive flag buoy */
+    const dv=new THREE.Group();dv.scale.setScalar(1.2);
+    const dh=new THREE.Group();dv.add(dh);Sp(dh,'#F7D7BE',.5,.46,.48,0,.16,0);mesh(new THREE.SphereGeometry(.26,16,8,0,Math.PI*2,0,Math.PI*.5),'#2B2F33',0,.18,-.01,dh);
+    B(dh,'#2F6FB0',.38,.16,.06,0,.1,.22);B(dh,'#9FD8F0',.3,.1,.07,0,.13,.23);Cy(dh,'#F2A65A',.035,.42,.24,.12,0);B(dh,'#F2A65A',.1,.05,.05,.21,.52,0);
+    const legs=new THREE.Group();dv.add(legs);[-.1,.1].forEach(x=>{Cy(legs,'#2B2F33',.07,.6,x,0,0);B(legs,'#F4C95D',.2,.42,.04,x,.55,0)});
+    const bub=[...Array(6)].map(()=>{const m=new THREE.Mesh(G.sphc,MT.foam);m.scale.setScalar(.12);m.renderOrder=3;dv.add(m);return m});
+    const drip=ripple(dv);const dpos=at(er*1.35,.4);dv.position.copy(dpos);tag(dv,by['自由潛水社']);
+    const buoy=new THREE.Group();Sp(buoy,'#F2A65A',.5,.4,.5,0,.05,0);Cy(buoy,'#3D4A48',.025,1.2,0,.2,0);
+    const flag=new THREE.Mesh(new THREE.PlaneGeometry(.6,.42),new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map:canvasTex(96,64,(g,w,h)=>{g.fillStyle='#E0322F';g.fillRect(0,0,w,h);g.strokeStyle='#ffffff';g.lineWidth=14;g.beginPath();g.moveTo(0,0);g.lineTo(w,h);g.stroke()})}));
+    flag.position.set(.32,1.18,0);buoy.add(flag);buoy.position.copy(at(er*1.38,1.35));tag(buoy,by['自由潛水社']);
+    world.seaTick=t=>{
+      sw.forEach((s,i)=>{const L=loops[i],a=L.ph+t*L.w,dir=Math.sign(L.w);
+        s.g.position.set(L.c.x+Math.cos(a)*L.R,Math.sin(t*3+i)*.04,L.c.z+Math.sin(a)*L.R);s.g.rotation.y=Math.atan2(-Math.sin(a)*dir,Math.cos(a)*dir);
+        const st=t*(i===2?2.5:5.5)+i;s.arms[0].rotation.x=st;s.arms[1].rotation.x=st+Math.PI;
+        s.kick.forEach((k,j)=>k.scale.setScalar(i===2?.12:.18+.12*Math.abs(Math.sin(t*9+j*1.7))));
+        const r=(t*.8+i*.3)%1;s.rip.scale.setScalar(.8+r*1.4)});
+      /* dive cycle: float, duck-dive (fins up), underwater with bubbles, resurface */
+      const c=(t+2)%10;let hy=0,ly=-2,uw=false;
+      if(c<4){hy=Math.sin(t*2.2)*.04;dh.rotation.x=0}
+      else if(c<5){const k=c-4;hy=-k*.9;dh.rotation.x=k*1.2;ly=-1.2+Math.sin(Math.PI*k)*1.6}
+      else if(c<9){hy=-2;uw=true}
+      else{const k=c-9;hy=-.9+k*.9;dh.rotation.x=(1-k)*.6}
+      dh.position.y=hy;legs.position.y=ly;legs.rotation.x=.25;drip.visible=!uw;
+      bub.forEach((b,j)=>{const q=(t*.9+j/6)%1;b.visible=uw;b.position.set(Math.sin(j*2.1+t)*.18,-.3+q*.4,Math.cos(j*1.3)*.18);b.scale.setScalar(.08+q*.08)});
+      flag.rotation.y=Math.sin(t*1.3)*.25;buoy.position.y=Math.sin(t*1.7)*.05};
+    world.seaLabels=[{club:by['水上活動社'],icon:'🏊',p:loops[0].c.clone().setY(1.6)},{club:by['自由潛水社'],icon:'🤿',p:dpos.clone().setY(1.7)}].filter(s=>s.club);
+    world.seaTick(0)}
+
   /* islander •ᴗ• */
   const av=new THREE.Group();
   Cy(av,'#4A5A78',.07,.2,-.09,0,0);Cy(av,'#4A5A78',.07,.2,.09,0,0);
@@ -763,18 +811,20 @@ function renderCard(){const x=cur;if(!x)return;const [col,e]=sty(x.c),st=stamps[
   $('cf').textContent=fav.has(x.zh)?tx('saved'):tx('save');$('cw').textContent=tx('walk');$('cw').hidden=!!st||!!going}
 
 /* ---------- island name signs (HTML, projected) ---------- */
-const lbl=$('lbl');let iEls=[],chEl=null;
+const lbl=$('lbl');let iEls=[],sEls=[],chEl=null;
 function buildLabels(){lbl.innerHTML='';if(!ok3d)return;
   iEls=ISLES.map(d=>{const el=document.createElement('button');const [col,ic]=sty(d.c),m=d.L.filter(x=>stamps[x.zh]).length,h=q?d.L.filter(ok).length:0;
     el.className='il'+(curIsle===d?' sel':'')+(q&&!h?' dim':'')+(m===d.L.length?' full':'');el.style.setProperty('--c',col);
     el.innerHTML=`<span class="ic">${ic}</span><span>${E(isn(d.c))}<small>${tx('clubs')(d.L.length)} · ${tx('stampsOf')(m,d.L.length)}${h?`<span class="hit">${tx('hits')(h)}</span>`:''}</small></span>`;
     el.onclick=()=>selectIsle(d);lbl.appendChild(el);return{el,d}});
+  sEls=(world.seaLabels||[]).map(s=>{const el=document.createElement('button');el.className='il ch sea';el.style.setProperty('--c',sty(s.club.c)[0]);el.innerHTML=`<span class="ic">${s.icon}</span><span>${E(nm(s.club))}</span>`;el.onclick=()=>select(s.club);lbl.appendChild(el);return{el,s}});
   chEl=document.createElement('button');chEl.className='il ch'+(q?' dim':'');chEl.style.setProperty('--c','#E39A4A');chEl.innerHTML=`<span class="ic">⛪</span><span>${E(tx('chapel'))}<small>${E(tx('chapel_s'))}</small></span>`;chEl.onclick=goChapel;lbl.appendChild(chEl)}
 const pv=new V3();
 function proj(x,y,z){pv.set(x,y,z).project(camera);return[(pv.x+1)/2*innerWidth,(1-pv.y)/2*innerHeight]}
 function placeLabels(){if(!ok3d)return;const W=innerWidth,H=innerHeight;lbl.classList.toggle('cmp',isMob()&&camera.zoom<1.6);
   const put=(el,x,y,z)=>{const [sx,sy]=proj(x,y,z);const on=sx>-120&&sx<W+120&&sy>-20&&sy<H+60;el.style.visibility=on?'visible':'hidden';if(on)el.style.transform=`translate(${sx}px,${sy-16}px) translate(-50%,-100%)`};
-  iEls.forEach(({el,d})=>put(el,d.x,TOP+d.top+.2,d.z));if(chEl)put(chEl,0,TOP+5.7,0)}
+  iEls.forEach(({el,d})=>put(el,d.x,TOP+d.top+.2,d.z));if(chEl)put(chEl,0,TOP+5.7,0);
+  sEls.forEach(({el,s})=>{if(camera.zoom<1.5)el.style.visibility='hidden';else put(el,s.p.x,s.p.y,s.p.z)})}
 
 /* ---------- time of day ---------- */
 const KF=[[0,'#24305A','#8FA6E8',.25,.45,'#1F3B63',1],[5,'#34396A','#9AA6E0',.28,.48,'#284873',1],[6.3,'#F7C8B0','#FFC8A0',.7,.62,'#8FC3CF',.4],[8,'#BDE5F4','#FFF6E6',1.15,.85,'#5FC4D6',0],[16,'#BDE5F4','#FFF6E6',1.15,.85,'#5FC4D6',0],[17.8,'#F8CF96','#FFB878',.95,.68,'#7DB9C4',.25],[19.2,'#9A88C2','#C2A4E8',.5,.55,'#4E73A0',.85],[20.6,'#303D69','#93A9EA',.3,.5,'#24426B',1],[24,'#24305A','#8FA6E8',.25,.45,'#1F3B63',1]];
@@ -798,12 +848,12 @@ function evCheck(){const ev=tx('events');let j=-1;ev.forEach((e,i)=>{if(hour>=e[
 /* ---------- picking ---------- */
 const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
 function hit(cx,cy){ndc.set(cx/innerWidth*2-1,-(cy/innerHeight)*2+1);ray.setFromCamera(ndc,camera);const hs=ray.intersectObjects(pick,true);
-  for(const h of hs){let o=h.object;while(o){if(o.userData.chapel)return{chapel:1};if(o.userData.isle!=null)return{isle:ISLES[o.userData.isle]};o=o.parent}}return null}
+  for(const h of hs){let o=h.object;while(o){if(o.userData.club)return{club:o.userData.club};if(o.userData.chapel)return{chapel:1};if(o.userData.isle!=null)return{isle:ISLES[o.userData.isle]};o=o.parent}}return null}
 let down=null;
 if(ok3d){const el=renderer.domElement;
   el.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,t:performance.now()}});
   el.addEventListener('pointerup',e=>{if(!down)return;const d=Math.hypot(e.clientX-down.x,e.clientY-down.y),dt=performance.now()-down.t;down=null;if(d>7||dt>600)return;
-    const h=hit(e.clientX,e.clientY);if(!h)return;if(h.chapel)goChapel();else if(h.isle)selectIsle(h.isle)});
+    const h=hit(e.clientX,e.clientY);if(!h)return;if(h.club)select(h.club);else if(h.chapel)goChapel();else if(h.isle)selectIsle(h.isle)});
   el.addEventListener('pointercancel',()=>down=null);
   let hv=0;el.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||e.buttons)return;const n=performance.now();if(n-hv<60)return;hv=n;el.style.cursor=hit(e.clientX,e.clientY)?'pointer':'grab'});
 }
@@ -886,6 +936,7 @@ function loop(now){requestAnimationFrame(loop);if(document.hidden)return;const d
     world.waveData.forEach((d,i)=>{tmpM.compose(tmpV.set(d.x+Math.sin(t*.3+d.p)*.4,.02,d.z),tmpQ.setFromEuler(tmpE.set(0,.6,0)),tmpS.setScalar(.5+.5*Math.sin(t*d.s+d.p)));world.waves.setMatrixAt(i,tmpM)});world.waves.instanceMatrix.needsUpdate=true;
     const ba=t*.03,br=WORLD_R+2;world.boat.position.set(Math.cos(ba)*br,Math.sin(t*2)*.04,Math.sin(ba)*br);world.boat.rotation.set(Math.sin(t*1.7)*.05,-ba,0);
     world.clouds.forEach((c,i)=>{c.position.x+=dt*(.35+i*.05);if(c.position.x>WORLD_R*1.3)c.position.x=-WORLD_R*1.3});
+    world.seaTick(t);
     (world.fires||[]).forEach((f,i)=>{f.scale.set(1,1+Math.sin(t*9+i*2)*.15,1)});
     if(world.sel.visible){world.sel.material.opacity=.55+Math.sin(t*3)*.35}}
   renderer.render(scene,camera);placeLabels()}
