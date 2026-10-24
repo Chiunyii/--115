@@ -792,7 +792,6 @@ if(ok3d){
       dh.position.y=hy;legs.position.y=ly;legs.rotation.x=.25;drip.visible=!uw;
       bub.forEach((b,j)=>{const q=(t*.9+j/6)%1;b.visible=uw;b.position.set(Math.sin(j*2.1+t)*.18,-.3+q*.4,Math.cos(j*1.3)*.18);b.scale.setScalar(.08+q*.08)});
       flag.rotation.y=Math.sin(t*1.3)*.25;buoy.position.y=Math.sin(t*1.7)*.05};
-    world.seaLabels=[{club:by['水上活動社'],icon:'🏊',p:loops[0].c.clone().setY(1.6)},{club:by['自由潛水社'],icon:'🤿',p:dpos.clone().setY(1.7)}].filter(s=>s.club);
     world.seaTick(0)}
 
   /* islander •ᴗ• */
