@@ -522,16 +522,16 @@ if(ok3d){
 
   /* ---------- the Luce Memorial Chapel, after the elevation drawings ----------
      Four tiled shells: a lower front pair and a taller rear pair, each rising from a ground edge to the ridge.
-     In plan the chapel is narrow at the entrance, widest where the pairs meet, and tapers to the rear.
+     In plan the chapel is narrow at the entrance, widest where the pairs meet, and narrows again to a tall rear glass wall.
      Glass fills the front and rear ends, a laddered glass band runs along each joint, a skylight runs along the ridge,
-     and the cross stands on the rear pair. All sizes are fractions of the rear height H, measured off the drawings. */
+     and the cross stands on the rear pair. All sizes are fractions of the rear height H, measured off the drawings, including the rear three-quarter view. */
   function chapel(){
-    const g=new THREE.Group(),H=3.3,h1=.9*H,Wf=.27*H,Wm=.71*H,wr=.07*H,gF=.03*H,gR=.055*H;
+    const g=new THREE.Group(),H=3.3,h1=.9*H,Wf=.27*H,Wm=.71*H,wr=.17*H,gF=.03*H,gR=.055*H;
     const Lf=.99*H,Lr=.56*H,zF=(Lf+Lr)/2,zJ=zF-Lf,zR=zJ-Lr,jb=.035*H,setF=.15*H,setR=.05*H;
     const tileM=new THREE.MeshLambertMaterial({map:T.tile,side:THREE.DoubleSide}),rib='#C46F2C',frame='#4A4F55';
     /* a shell: ground curve G(u) → ridge R(u); each cross-section flares out at the base */
     const F={G:u=>({x:Wf+(Wm-Wf)*u,z:zF-u*Lf}),R:u=>({x:gF,y:h1,z:zF-setF+(zJ-zF+setF)*u}),p:u=>1.5+.45*u,uv:[Lf,h1*1.2]};
-    const Rr={G:u=>({x:wr+(Wm-wr)*Math.pow(1-u,1.6),z:zJ-jb-u*(Lr-jb)}),R:u=>({x:gR,y:H,z:zJ-jb+(zR+setR-zJ+jb)*u}),p:u=>2-.3*u,uv:[Lr*1.4,H*1.2]};
+    const Rr={G:u=>({x:wr+(Wm-wr)*(1-u),z:zJ-jb-u*(Lr-jb)}),R:u=>({x:gR,y:H,z:zJ-jb+(zR+setR-zJ+jb)*u}),p:u=>2-.65*u,uv:[Lr*1.4,H*1.2]};
     const pt=(S,s,u,v)=>{const a=S.G(u),b=S.R(u),k=1-(1-v)*(1-v);return new V3(s*(b.x+(a.x-b.x)*Math.pow(1-v,S.p(u))),b.y*v,a.z+(b.z-a.z)*k)};
     const grid=(nu,nv,f,uvf,flip)=>{const pos=[],uv=[],idx=[];
       for(let i=0;i<=nu;i++)for(let j=0;j<=nv;j++){const p=f(i/nu,j/nv);pos.push(p.x,p.y,p.z);const t=uvf(i/nu,j/nv);uv.push(t[0],t[1])}
@@ -553,7 +553,9 @@ if(ok3d){
       for(let k=1;k<rows;k++){const v=k/rows*.97,p=e(v);bar(new V3(-p.x,p.y,p.z+dir*.02),new V3(p.x,p.y,p.z+dir*.02),.03,frame)}
       tube(v=>{const p=e(v*.97);p.x=0;p.z+=dir*.02;return p},.025,frame,12);
       const b0=e(0);B(g,'#2B2F33',b0.x*1.9,.12,.05,0,0,b0.z+dir*.03);return b0};
-    const fz=endWall(F,0,1,13).z;endWall(Rr,1,-1,10);
+    const fz=endWall(F,0,1,13).z;endWall(Rr,1,-1,14);
+    /* the stacked boxes capping the skylight at the rear */
+    {const rz=zR+setR;B(g,'#ECE4D2',gR*2+.22,.2,.34,0,H-.32,rz-.05);B(g,'#ECE4D2',gR*2+.12,.16,.26,0,H-.62,rz-.1);B(g,'#2B2F33',gR*2+.05,.08,.02,0,H-.27,rz-.23)}
     /* entrance: a small house-shaped porch, then steps */
     B(g,'#ECE4D2',.4,.42,.32,0,0,fz+.12);mesh(gable(.4,.32,.14,.02),'#ECE4D2',0,.42,fz+.12,g);B(g,'#5A3B26',.24,.34,.03,0,0,fz+.29);
     B(g,'#CFC7B6',.9,.06,.35,0,0,fz+.45);B(g,'#D9D2C3',.7,.12,.22,0,0,fz+.38);
