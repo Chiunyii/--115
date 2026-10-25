@@ -206,6 +206,7 @@ dialog::backdrop{background:rgba(24,61,59,.55)}
     <button id="stampBtn"><span>🏅</span><span id="stampTxt">0 / 0</span></button>
   </div>
   <div class="rbtns">
+    <button class="ib card" id="music" aria-pressed="true" aria-label="關閉背景音樂">🔊</button>
     <button class="ib w card langbtn" aria-label="Language / 語言">EN</button>
     <button class="ib card" id="help" aria-label="使用說明">?</button>
   </div>
@@ -279,6 +280,7 @@ let LG=LS.get('club-lang','zh')==='en'?'en':'zh';
 
 /* ---------- text ---------- */
 const TX={zh:{
+ music_on:'開啟背景音樂',music_off:'關閉背景音樂',music_is_on:'🔊 背景音樂已開啟',music_is_off:'🔇 已靜音',music_hint:'♪ 背景音樂播放中，右上角 🔊 可以靜音',
  title:'東海大學社團島',h1:'東海大學社團<em>島</em>',splash:'正在搭橋，連起七座社團島…',ph:'搜尋社團，中英文都可以',
  t_dice:'抽一個',t_bird:'鳥瞰',t_home:'全景',day:'東海人的一天',
  nav_map:'群島',nav_list:'清單',nav_fav:'收藏',nav_log:'護照',skip:'略過',next:'下一步 →',go:'開始探索',
@@ -298,6 +300,7 @@ const TX={zh:{
  events:[[6,'清晨，相思林裡的鳥先醒了'],[8,'第一堂課，橋上都是趕課的人'],[12,'午餐時間，社團攤位前最熱鬧'],[15,'下午，體能島的球聲沒停過'],[18,'傍晚，社辦的燈一盞盞亮起'],[19.5,'社課時間，群島最熱鬧的時候'],[22,'夜深了，藝術島還有人在練團']],
  steps:n=>[['歡迎登上東海大學社團島！',`${n} 個社團依類型住在 7 座小島上，小島之間有橋相連，中間是路思義教堂。`],['點一座島，看看島上有誰','點小島或上方的島名，就會打開那座島的社團清單。點一個社團，•ᴗ• 會走過橋去幫你蓋章。'],['不知道從哪裡開始？','按 🎲 讓島嶼替你抽一個，或用搜尋找出有符合社團的小島。拉動時間軸，看島上從清晨到深夜。']]
 },en:{
+ music_on:'Turn music on',music_off:'Mute music',music_is_on:'🔊 Music on',music_is_off:'🔇 Muted',music_hint:'♪ Music is playing. Tap 🔊 at the top right to mute',
  title:'Tunghai University Club Island',h1:'Tunghai Club <em>Islands</em>',splash:'Building bridges between seven islands…',ph:'Search clubs in Chinese or English',
  t_dice:'Pick',t_bird:'Top',t_home:'Reset',day:'A day at Tunghai',
  nav_map:'Islands',nav_list:'List',nav_fav:'Saved',nav_log:'Passport',skip:'Skip',next:'Next →',go:'Start exploring',
@@ -831,9 +834,9 @@ if(ok3d){
       const hn=person(pd,{x:Math.cos(ga)*(RF+.75)+Math.cos(ga)*.5,z:Math.sin(ga)*(RF+.75)+Math.sin(ga)*.5,ry:Math.atan2(-Math.cos(ga),-Math.sin(ga)),shirt:'#F4C95D',hair:'#5A3B2B'});
       Sp(hn.arms[0],'#8A5A36',.12,.06,.18,0,-.36,.04);
       anim(t=>{h2.nk.rotation.x=1.35+Math.sin(t*.8)*.12;h2.tl.rotation.z=Math.sin(t*2)*.3;hn.arms[0].rotation.x=-1.2+Math.sin(t*3)*.35;hn.head.rotation.y=Math.sin(t*.5)*.3})}
-    if(d.c==='體能性'){/* a five-a-side kickabout on the lawn facing Academic Isle: passes round the pitch, then a shot */
-      const ac=ISLES.find(o=>o.c==='學術性')||ISLES[(d.i+NI-1)%NI],L=lawn(d,ang,Math.atan2(ac.z-d.z,ac.x-d.x),2.0);
-      const c=new THREE.Group();c.position.set(L.x+Math.cos(L.a)*.45,TOP,L.z+Math.sin(L.a)*.45);c.rotation.y=Math.atan2(Math.cos(SPOT_A),Math.sin(SPOT_A));g.add(c);
+    if(d.c==='體能性'){/* a five-a-side kickabout on the left lawn: passes round the pitch, then a shot */
+      const L=lawn(d,ang,SPOT_A+1.1,2.0);/* the open lawn on the left of the default view */
+      const c=new THREE.Group();c.position.set(L.x+Math.cos(L.a)*.85,TOP,L.z+Math.sin(L.a)*.85);c.rotation.y=Math.atan2(Math.cos(SPOT_A),Math.sin(SPOT_A));g.add(c);
       const W=2.4,Hh=1.5;B(c,'#79C25F',W,.025,Hh,0,0,0);
       [[W,.04,0,-Hh/2+.02],[W,.04,0,Hh/2-.02],[.04,Hh,-W/2+.02,0],[.04,Hh,W/2-.02,0],[.04,Hh,0,0]].forEach(([w,h,x,z])=>B(c,'#FFFDF6',w,.03,h,x,0,z));
       mesh(new THREE.RingGeometry(.26,.3,28).rotateX(-Math.PI/2),'#FFFDF6',0,.032,0,c);
@@ -1194,7 +1197,7 @@ $('help').onclick=()=>{si=0;step();$('tour').showModal()};
 function applyLang(){const e=LG==='en';document.documentElement.lang=e?'en':'zh-Hant';document.title=tx('title');
   document.querySelectorAll('[data-k]').forEach(n=>n.textContent=tx(n.dataset.k));
   $('ttl').innerHTML=tx('h1');$('q').placeholder=tx('ph');$('q').setAttribute('aria-label',tx('ph'));
-  document.querySelectorAll('.langbtn').forEach(b=>b.textContent=e?'中文':'EN');
+  document.querySelectorAll('.langbtn').forEach(b=>b.textContent=e?'中文':'EN');BGM.ui();
   $('sem').textContent=tx('sem')(SY,STm);renderChips();updCount();step();buildLabels();if(ok3d)world.redrawSigns();if(cur)renderCard();if(view!=='map')renderPanel();lastEv=-1;evCheck()}
 document.addEventListener('click',e=>{if(e.target.closest('.langbtn')){LG=LG==='en'?'zh':'en';LS.set('club-lang',LG);applyLang()}});
 
@@ -1214,6 +1217,19 @@ function loop(now){requestAnimationFrame(loop);if(document.hidden)return;const d
     (world.fires||[]).forEach((f,i)=>{f.scale.set(1,1+Math.sin(t*9+i*2)*.15,1)});
     if(world.sel.visible){world.sel.material.opacity=.55+Math.sin(t*3)*.35}}
   renderer.render(scene,camera);placeLabels()}
+
+/* ---------- background music: Fortaleza (Topher Mohr and Alex Elena), looped at 50% volume ----------
+   The page tries to start it straight away; browsers that block sound before interaction get it on the first tap or key press. 🔊/🔇 toggles it, remembered on this device. */
+const BGM=(()=>{const a=new Audio('bgm.mp3');a.loop=true;a.volume=.5;a.preload='auto';
+  let on=LS.get('club-music','on')!=='off',hinted=false;
+  const ui=()=>{const b=$('music');if(!b)return;b.textContent=on?'🔊':'🔇';b.setAttribute('aria-pressed',on);b.setAttribute('aria-label',on?tx('music_off'):tx('music_on'));b.title=b.getAttribute('aria-label')};
+  const play=()=>{if(!on||!a.paused)return;a.play().then(()=>{if(!hinted){hinted=true;tick(tx('music_hint'),5)}}).catch(()=>{})};
+  const first=e=>{if(e.target&&e.target.closest&&e.target.closest('#music'))return;play();if(!on||!a.paused){removeEventListener('pointerdown',first,true);removeEventListener('keydown',first,true)}};
+  addEventListener('pointerdown',first,true);addEventListener('keydown',first,true);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)a.pause();else play()});
+  function toggle(){on=!on;LS.set('club-music',on?'on':'off');if(on)play();else a.pause();ui();toast(on?tx('music_is_on'):tx('music_is_off'),1600)}
+  play();return {toggle,ui}})();
+$('music').onclick=()=>BGM.toggle();
 
 /* ---------- boot ---------- */
 saveFav();updStamp();
