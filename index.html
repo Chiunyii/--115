@@ -756,7 +756,8 @@ if(ok3d){
 
   /* ---------- lawn life: extra islanders on each island (island-local coords, feet on the grass) ---------- */
   /* a clear lawn spot near angle p: away from bridges, clear of the plaza, inside the shore; trees are kept out of it */
-  function lawn(d,ang,p,keep=1.7){let A=p,best=-9;for(let k=-16;k<=16;k++){const a=p+k*.05,s=Math.min(...ang.map(b=>angOff(a,b)))-Math.abs(k)*.012;if(s>best){best=s;A=a}}
+  function lawn(d,ang,p,keep=1.7){let A=p,best=-9;for(let k=-16;k<=16;k++){const a=p+k*.05,r0=Math.min(d.pr+1.75,rad(d,a)*.8),qx=d.x+Math.cos(a)*r0,qz=d.z+Math.sin(a)*r0;
+    const hitOther=(d.keepOut||[]).some(o=>Math.hypot(o.x-qx,o.z-qz)<o.r+keep*.8),s=Math.min(...ang.map(b=>angOff(a,b)))-Math.abs(k)*.012-(hitOther?5:0);if(s>best){best=s;A=a}}
     const r=Math.min(d.pr+1.75,rad(d,A)*.8),x=Math.cos(A)*r,z=Math.sin(A)*r;(d.keepOut||(d.keepOut=[])).push({x:d.x+x,z:d.z+z,r:keep});return {x,z,a:A}}
   const walkLegs=(p,t,k=9)=>{const s=Math.sin(t*k);p.legs[0].rotation.x=s*.55;p.legs[1].rotation.x=-s*.55;p.arms[0].rotation.x=-s*.45;p.arms[1].rotation.x=s*.45};
   const ELDER={hair:'#E6E3DC',skin:'#F1CDB0'};
@@ -830,6 +831,28 @@ if(ok3d){
       const hn=person(pd,{x:Math.cos(ga)*(RF+.75)+Math.cos(ga)*.5,z:Math.sin(ga)*(RF+.75)+Math.sin(ga)*.5,ry:Math.atan2(-Math.cos(ga),-Math.sin(ga)),shirt:'#F4C95D',hair:'#5A3B2B'});
       Sp(hn.arms[0],'#8A5A36',.12,.06,.18,0,-.36,.04);
       anim(t=>{h2.nk.rotation.x=1.35+Math.sin(t*.8)*.12;h2.tl.rotation.z=Math.sin(t*2)*.3;hn.arms[0].rotation.x=-1.2+Math.sin(t*3)*.35;hn.head.rotation.y=Math.sin(t*.5)*.3})}
+    if(d.c==='體能性'){/* a five-a-side kickabout on the lawn facing Academic Isle: passes round the pitch, then a shot */
+      const ac=ISLES.find(o=>o.c==='學術性')||ISLES[(d.i+NI-1)%NI],L=lawn(d,ang,Math.atan2(ac.z-d.z,ac.x-d.x),2.0);
+      const c=new THREE.Group();c.position.set(L.x+Math.cos(L.a)*.45,TOP,L.z+Math.sin(L.a)*.45);c.rotation.y=Math.atan2(Math.cos(SPOT_A),Math.sin(SPOT_A));g.add(c);
+      const W=2.4,Hh=1.5;B(c,'#79C25F',W,.025,Hh,0,0,0);
+      [[W,.04,0,-Hh/2+.02],[W,.04,0,Hh/2-.02],[.04,Hh,-W/2+.02,0],[.04,Hh,W/2-.02,0],[.04,Hh,0,0]].forEach(([w,h,x,z])=>B(c,'#FFFDF6',w,.03,h,x,0,z));
+      mesh(new THREE.RingGeometry(.26,.3,28).rotateX(-Math.PI/2),'#FFFDF6',0,.032,0,c);
+      [-1,1].forEach(s=>{const x=s*(W/2+.02);[-.32,.32].forEach(z=>Cy(c,'#FFFDF6',.025,.42,x,0,z));const cb=mesh(G.cbox,'#FFFDF6',x,.42,0,c);cb.scale.set(.05,.05,.69);
+        const nt=mesh(G.cbox,new THREE.MeshLambertMaterial({color:0xFFFDF6,transparent:true,opacity:.4}),x+s*.15,.22,0,c);nt.scale.set(.3,.42,.64)});
+      const P=[[-.75,-.35],[.1,-.45],[.65,.25],[-.2,.4],[.95,-.2]],team=['#E0322F','#2F6FB0','#E0322F','#2F6FB0','#E0322F'];
+      const pl=P.map(([x,z],i)=>person(c,{x,z,shirt:team[i],pants:'#FFFDF6',hair:['#2B2F33','#5A3B2B','#8A5A36','#2B2F33','#C9573A'][i],s:.85}));
+      const keeper=person(c,{x:-W/2+.15,z:0,ry:Math.PI/2,shirt:'#F4C95D',pants:'#2B2F33',hair:'#3D2E22',s:.85});
+      const ball=Sp(c,'#FFFDF6',.14,.14,.14,0,0,0);const spot=mesh(new THREE.CircleGeometry(.05,8),'#2B2F33',0,.075,.069,ball);
+      const seq=[0,1,2,3,4,-1],goal=new V3(-W/2-.05,.12,.12);
+      anim(t=>{const T=t*.85,k=Math.floor(T)%seq.length,f=T%1,from=seq[k],to=seq[(k+1)%seq.length];
+        const A=from<0?goal:new V3(P[from][0],.07,P[from][1]),Bt=to<0?goal:new V3(P[to][0],.07,P[to][1]);
+        if(from<0){ball.position.set(...(f<.5?[goal.x,.07,goal.z]:[goal.x+(P[0][0]-goal.x)*(f-.5)*2,.07,goal.z+(P[0][1]-goal.z)*(f-.5)*2]))}
+        else{ball.position.lerpVectors(A,Bt,f);ball.position.y=.07+Math.sin(Math.PI*f)*(to<0?.35:.12)}
+        ball.rotation.x+=.25;
+        pl.forEach((p,i)=>{const dx=ball.position.x-P[i][0],dz=ball.position.z-P[i][1];p.g.rotation.y=Math.atan2(dx,dz);
+          const kick=i===from&&f<.25,j=Math.sin(t*7+i);p.legs[0].rotation.x=kick?-1.3*Math.sin(f/.25*Math.PI):j*.25;p.legs[1].rotation.x=kick?.3:-j*.25;
+          p.arms[0].rotation.x=-j*.3;p.arms[1].rotation.x=j*.3;p.g.position.y=Math.abs(j)*.03});
+        const kz=Math.max(-.3,Math.min(.3,ball.position.z));keeper.g.position.z=kz;const dive=to<0&&f>.6;keeper.arms.forEach(a=>a.rotation.x=dive?-2.8:-.5);keeper.g.position.y=dive?.12:0})}
     if(d.c==='學術性'){/* birds circling over the lawn; birdwatchers follow them with binoculars */
       const L=lawn(d,ang,SPOT_A-1.4,2.2),cx=L.x,cz=L.z;
       const fl=['#5D9FE3','#F4C95D','#E8506A','#7A5A40'].map(c=>bird(g,c));
