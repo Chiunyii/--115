@@ -523,14 +523,47 @@ if(ok3d){
       const spk=bubble(g,-1.5,1.55,.5,'✨');
       anim(t=>{tp.rotation.y=Math.sin(t*.25)*.35;sg.head.rotation.y=Math.sin(t*.25)*.25;const c=(t*.3)%1;spk.visible=c<.35;spk.position.y=1.5+c*.4});
       return 3.3},
+    /* 體能島: an open-air sports ground — basketball, volleyball, badminton, a skate ramp, and a roller skater circling it all */
     gym(g,d,col){
-      B(g,woodM('#F3E6CB'),3.2,1.6,2.2,0,0,0);
-      const bar=new THREE.CylinderGeometry(1.75,1.75,2.5,28,1,false,Math.PI/2,Math.PI).rotateX(Math.PI/2);
-      const rf=mesh(bar,roofMat(col),0,1.6,0,g);rf.scale.y=.55;
-      [-.9,0,.9].forEach(z=>{const r=mesh(new THREE.CylinderGeometry(1.79,1.79,.1,28,1,false,Math.PI/2,Math.PI).rotateX(Math.PI/2),'#FFFDF6',0,1.6,z,g);r.scale.y=.56});
-      door(g,0,0,1.11,.9,.9,'#B8743A');win(g,-1.1,.5,1.11,.5,.36);win(g,1.1,.5,1.11,.5,.36);sign(g,d,0,1.28,1.16);
-      Cy(g,'#5A6170',.06,2.1,2.1,0,.6);B(g,'#FFFFFF',.08,.6,.8,2.06,1.7,.6);const ring=mesh(new THREE.TorusGeometry(.2,.03,8,20).rotateX(Math.PI/2),'#F07A3A',1.83,1.85,.6,g);
-      Sp(g,'#F08A3C',.34,.34,.34,1.55,.17,1.65);return 2.8},
+      const court=(x,z,w,h,c,lines)=>{B(g,c,w,.03,h,x,0,z);B(g,'#FFFDF6',w,.035,.04,x,0,z-h/2+.02);B(g,'#FFFDF6',w,.035,.04,x,0,z+h/2-.02);B(g,'#FFFDF6',.04,.035,h,x-w/2+.02,0,z);B(g,'#FFFDF6',.04,.035,h,x+w/2-.02,0,z);if(lines)lines()};
+      const net=(x,z,len,h)=>{[-1,1].forEach(s=>Cy(g,'#5A6170',.025,h+.05,x,0,z+s*len/2));B(g,'#FFFDF6',.03,.04,len,x,h,z);const n=B(g,'#3D4A48',.01,.3,len,x,h-.3,z);n.material=new THREE.MeshLambertMaterial({color:0x3D4A48,transparent:true,opacity:.55})};
+      const arc=(a,b,h,k)=>new V3(a.x+(b.x-a.x)*k,a.y+(b.y-a.y)*k+Math.sin(Math.PI*k)*h,a.z+(b.z-a.z)*k);
+      /* basketball, back left */
+      court(-1.15,-.8,2.0,1.45,'#E8955A',()=>{const k=mesh(new THREE.RingGeometry(.38,.42,24,1,0,Math.PI).rotateX(-Math.PI/2),'#FFFDF6',-1.15,.04,-1.52,g)});
+      Cy(g,'#5A6170',.05,1.55,-1.15,0,-1.68);B(g,'#FFFFFF',.6,.42,.05,-1.15,1.25,-1.62);mesh(new THREE.TorusGeometry(.15,.025,8,20).rotateX(Math.PI/2),'#F07A3A',-1.15,1.33,-1.45,g);
+      const sh=person(g,{x:-1.05,z:-.35,ry:Math.PI,shirt:'#F28C72',hair:'#2B2F33'}),rb=person(g,{x:-1.6,z:-1.0,ry:2.4,shirt:'#5D9FE3',hair:'#5A3B2B'});
+      const bb=Sp(g,'#E8702A',.2,.2,.2,0,0,0);
+      anim(t=>{const c=(t*.45)%1,hand=new V3(-1.05,.95,-.48),ring=new V3(-1.15,1.42,-1.45),floor=new V3(-1.55,.1,-.85);
+        if(c<.4){const b=Math.abs(Math.sin(c/.4*Math.PI*3));bb.position.set(-.98,.12+b*.6,-.5);sh.arms[0].rotation.x=-.8-b*.3;sh.arms[1].rotation.x=-.3;sh.g.position.y=0}
+        else if(c<.75){const k=(c-.4)/.35;bb.position.copy(arc(hand,ring,.9,k));sh.arms[0].rotation.x=sh.arms[1].rotation.x=-2.8;sh.g.position.y=k<.3?Math.sin(k/.3*Math.PI)*.25:0}
+        else{const k=(c-.75)/.25;bb.position.copy(arc(ring,floor,.15,k));sh.arms[0].rotation.x=sh.arms[1].rotation.x=-.3}
+        rb.arms.forEach(a=>a.rotation.x=c>.6?-2.4:-.6);rb.g.position.y=c>.7&&c<.8?.18:0;rb.g.rotation.y=Math.atan2(bb.position.x+1.6,bb.position.z+1.0)});
+      /* volleyball, back right */
+      court(1.15,-.8,2.0,1.45,'#E3C88F');net(1.15,-.8,1.45,.95);
+      const v1=person(g,{x:.55,z:-.8,ry:Math.PI/2,shirt:'#F4C95D',hair:'#3D2E22'}),v2=person(g,{x:1.75,z:-.8,ry:-Math.PI/2,shirt:'#5FBFA8',hair:'#2B2F33',cap:'#FFFDF6'});
+      const vb=Sp(g,'#FFFDF6',.22,.22,.22,0,0,0);Sp(g,'#5D9FE3',.12,.23,.12,0,0,0).visible=false;
+      anim(t=>{const w=(t*.55)%2,k=w<1?w:2-w,a=new V3(.68,1.15,-.8),b=new V3(1.62,1.15,-.8);vb.position.copy(arc(a,b,.9,k));
+        [v1,v2].forEach((p,i)=>{const near=i?k>.8:k<.2;p.arms.forEach(x=>x.rotation.x=near?-2.9:-.7);p.g.position.y=near?.12:0})});
+      /* badminton, front left */
+      court(-1.15,.9,2.0,1.3,'#7FB86A');net(-1.15,.9,1.3,.75);
+      const racket=p=>{const r=new THREE.Group();r.position.set(0,-.32,.02);Cy(r,'#3D4A48',.012,.3,0,-.3,0);const h=mesh(new THREE.TorusGeometry(.09,.012,6,16),'#E8506A',0,-.4,0,r);p.arms[0].add(r)};
+      const b1=person(g,{x:-1.7,z:.9,ry:Math.PI/2,shirt:'#E88AAE',hair:'#5A3B2B'}),b2=person(g,{x:-.6,z:.9,ry:-Math.PI/2,shirt:'#B98BD9',hair:'#2B2F33'});racket(b1);racket(b2);
+      const sc=mesh(new THREE.ConeGeometry(.06,.12,8).rotateZ(Math.PI/2),'#FFFDF6',0,0,0,g);
+      anim(t=>{const w=(t*.6+.3)%2,k=w<1?w:2-w,a=new V3(-1.55,1.25,.9),b=new V3(-.75,1.25,.9);sc.position.copy(arc(a,b,.6,k));sc.rotation.y=w<1?0:Math.PI;
+        [b1,b2].forEach((p,i)=>{const near=i?k>.85:k<.15;p.arms[0].rotation.x=near?-2.9:-1.2;p.arms[0].rotation.z=near?-.3:0})});
+      /* skate ramp, front right: a skater rolls back and forth and pops off the top */
+      const rs=new THREE.Shape();rs.moveTo(0,0);rs.lineTo(.7,0);rs.lineTo(.7,.55);rs.quadraticCurveTo(.15,.05,0,0);
+      const ramp=mesh(new THREE.ExtrudeGeometry(rs,{depth:1.0,bevelEnabled:false}),'#B8C2CC',1.5,0,.4,g);B(g,'#8C96A0',.05,.06,1.0,2.18,.52,.9);
+      B(g,'#B8C2CC',.6,.18,1.0,.6,0,.9);
+      const sk=new THREE.Group();g.add(sk);const brd=B(sk,'#E8506A',.5,.04,.15,0,.06,0);[-.17,.17].forEach(x=>Sp(sk,'#2B2F33',.06,.06,.15,x,.04,0));
+      const sp=person(sk,{y:.1,ry:Math.PI/2,shirt:'#2B2F33',hair:'#C9573A',cap:'#F4C95D'});sp.arms[0].rotation.z=1.1;sp.arms[1].rotation.z=-1.1;sp.legs[0].rotation.x=.3;sp.legs[1].rotation.x=-.3;
+      anim(t=>{const w=(t*.4)%2,k=w<1?w:2-w,x=.95+k*1.05;let y=0;if(x>1.5){const q=(x-1.5)/.55;y=Math.min(.55,q*q*.55)}
+        if(k>.93)y+=.3*Math.sin((k-.93)/.07*Math.PI/2);sk.position.set(x,y+.0,.9);sk.rotation.z=x>1.5?Math.min(1.2,(x-1.5)*1.6):0;sk.rotation.y=w<1?0:Math.PI;sk.rotation.order='YXZ'});
+      /* roller skater gliding round the courts */
+      const rk=person(g,{shirt:'#F4C95D',hair:'#8A5A36'});rk.legs.forEach(l=>{B(l,'#E8506A',.16,.08,.22,0,-.22,.02)});
+      anim(t=>{const a=t*.42,R=2.72;rk.g.position.set(Math.cos(a)*R,0,Math.sin(a)*R);rk.g.rotation.y=Math.atan2(-Math.sin(a),Math.cos(a));const s=Math.sin(t*4);rk.legs[0].rotation.z=Math.max(0,s)*.4;rk.legs[1].rotation.z=-Math.max(0,-s)*.4;rk.arms[0].rotation.x=-s*.6;rk.arms[1].rotation.x=s*.6;rk.g.rotation.z=s*.06});
+      Cy(g,'#8A5A36',.06,1.95,-.6,0,-2.05);Cy(g,'#8A5A36',.06,1.95,.6,0,-2.05);sign(g,d,0,1.85,-2.0,1.6);
+      return 2.3},
     stage(g,d,col){
       B(g,'#C79A66',3.3,.45,2.1,0,0,0);B(g,'#E8CFA8',3.36,.06,2.16,0,.45,0);
       const sh=mesh(new THREE.SphereGeometry(1.6,30,14,Math.PI,Math.PI,0,Math.PI/2),lam(col),0,.5,-.15,g);sh.scale.y=1.35;
@@ -765,6 +798,15 @@ if(ok3d){
       const tb=bubble(bg,0,1.35,-.45,'😊');
       anim(t=>{e2.head.rotation.x=.25+Math.sin(t*.9)*.08;s2.head.rotation.y=-Math.sin(t*.5)*.3;const c=(t*.2+.5)%1;tb.visible=c<.3;
         const k=Math.max(0,Math.sin(t*1.2));[e3,s3].forEach((p,i)=>{p.arms[0].rotation.x=-k*2.9;p.arms[1].rotation.x=-k*2.9;p.g.position.y=0})})}
+    if(d.c==='體能性'){/* taekwondo practice on the lawn: front kicks, punches, a shout */
+      const L=lawn(d,ang,SPOT_A+1.45,2.0),c=new THREE.Group();c.position.set(L.x,TOP,L.z);c.rotation.y=Math.atan2(Math.cos(SPOT_A),Math.sin(SPOT_A));g.add(c);
+      for(let i=0;i<3;i++)for(let j=0;j<2;j++)B(c,(i+j)%2?'#2F6FB0':'#E0322F',.6,.04,.6,(i-1)*.6,0,(j-.5)*.6);
+      const kd=[[-.55,'#2B2F33'],[0,'#F4C95D'],[.55,'#E0322F']].map(([x,belt],i)=>{const p=person(c,{x,z:i===1?-.2:.15,ry:i===1?0:Math.PI,shirt:'#FFFDF6',pants:'#FFFDF6',hair:i===1?'#2B2F33':'#5A3B2B',y:.04});B(p.g,belt,.46,.06,.46,0,.3,0);return p});
+      const hy=bubble(c,0,1.45,-.2,'🥋');
+      anim(t=>{kd.forEach((p,i)=>{const s=(t*.8+(i===1?0:.5))%1;
+          if(s<.5){const k=Math.sin(s/.5*Math.PI);p.legs[0].rotation.x=-k*1.6;p.legs[1].rotation.x=0;p.arms[0].rotation.x=-.6;p.arms[1].rotation.x=-1.0;p.g.position.y=.04}
+          else{const k=Math.sin((s-.5)/.5*Math.PI);p.legs[0].rotation.x=0;p.arms[1].rotation.x=-1.55*k-.3;p.arms[0].rotation.x=-.9+.4*k;p.g.position.y=.04}});
+        const c2=(t*.8)%1;hy.visible=c2>.1&&c2<.35})}
     if(d.c==='學術性'){/* birds circling over the lawn; birdwatchers follow them with binoculars */
       const L=lawn(d,ang,SPOT_A-1.4,2.2),cx=L.x,cz=L.z;
       const fl=['#5D9FE3','#F4C95D','#E8506A','#7A5A40'].map(c=>bird(g,c));
