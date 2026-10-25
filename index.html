@@ -807,6 +807,29 @@ if(ok3d){
           if(s<.5){const k=Math.sin(s/.5*Math.PI);p.legs[0].rotation.x=-k*1.6;p.legs[1].rotation.x=0;p.arms[0].rotation.x=-.6;p.arms[1].rotation.x=-1.0;p.g.position.y=.04}
           else{const k=Math.sin((s-.5)/.5*Math.PI);p.legs[0].rotation.x=0;p.arms[1].rotation.x=-1.55*k-.3;p.arms[0].rotation.x=-.9+.4*k;p.g.position.y=.04}});
         const c2=(t*.8)%1;hy.visible=c2>.1&&c2<.35})}
+    if(d.c==='體能性'){/* a paddock with a rider trotting round it, and a second horse grazing while a handler brushes it */
+      const L=lawn(d,ang,SPOT_A-1.45,2.4),pd=new THREE.Group();pd.position.set(L.x,TOP,L.z);g.add(pd);
+      const RF=1.4,np=14,gate=SPOT_A;for(let k=0;k<np;k++){const a=k/np*Math.PI*2;if(angOff(a,gate)<.2)continue;Cy(pd,'#8A5A36',.05,.5,Math.cos(a)*RF,0,Math.sin(a)*RF);
+        const a2=(k+1)/np*Math.PI*2;if(angOff(a2,gate)<.2)continue;const mx=(Math.cos(a)+Math.cos(a2))/2*RF,mz=(Math.sin(a)+Math.sin(a2))/2*RF,len=2*RF*Math.sin(Math.PI/np);
+        [.22,.42].forEach(y=>{const r=mesh(G.cbox,'#B07A48',mx,y,mz,pd);r.scale.set(.05,.05,len);r.rotation.y=Math.atan2(Math.cos(a2)-Math.cos(a),Math.sin(a2)-Math.sin(a))})}
+      const horse=(coat,mane)=>{const h=new THREE.Group();Sp(h,coat,.5,.44,.98,0,.72,0);
+        const legs=[[-.14,.32],[.14,.32],[-.14,-.32],[.14,-.32]].map(([x,z])=>{const q=new THREE.Group();q.position.set(x,.56,z);Cy(q,coat,.065,.56,0,-.56,0);Sp(q,'#3D2E22',.14,.08,.15,0,-.54,.01);h.add(q);return q});
+        const nk=new THREE.Group();nk.position.set(0,.85,.38);nk.rotation.x=.55;h.add(nk);Cy(nk,coat,.12,.5,0,0,0);B(nk,mane,.07,.48,.1,0,.04,-.11);
+        const hd=new THREE.Group();hd.position.set(0,.48,.06);nk.add(hd);Sp(hd,coat,.24,.26,.48,0,0,.12);Sp(hd,lighten(coat,.35),.2,.18,.18,0,-.04,.34);
+        [-1,1].forEach(s=>{Sp(hd,'#2B2F33',.05,.06,.04,s*.1,.05,.18);mesh(new THREE.ConeGeometry(.04,.12,6).translate(0,.06,0),coat,s*.07,.12,-.02,hd)});
+        const tl=new THREE.Group();tl.position.set(0,.82,-.48);h.add(tl);const tm=mesh(new THREE.CylinderGeometry(.05,.09,.5,8).translate(0,-.25,0),mane,0,0,0,tl);tl.rotation.x=.5;
+        pd.add(h);return {h,legs,nk,tl}};
+      /* rider on a chestnut horse */
+      const h1=horse('#A8673A','#3D2E22');B(h1.h,'#E0322F',.44,.08,.36,0,1.06,-.02);
+      const rd=person(h1.h,{y:.92,z:-.02,shirt:'#FFFDF6',pants:'#E8DCC0',hair:'#3D2E22',cap:'#2B2F33',sit:true});rd.legs.forEach((l,i)=>l.rotation.set(-1.25,0,i?-.55:.55));rd.arms.forEach(a=>a.rotation.x=-1.0);
+      anim(t=>{const a=-t*.5,R=.8;h1.h.position.set(Math.cos(a)*R,Math.abs(Math.sin(t*6))*.06,Math.sin(a)*R);h1.h.rotation.y=Math.atan2(Math.sin(a),-Math.cos(a));
+        const s=Math.sin(t*6);h1.legs[0].rotation.x=s*.6;h1.legs[3].rotation.x=s*.6;h1.legs[1].rotation.x=-s*.6;h1.legs[2].rotation.x=-s*.6;h1.nk.rotation.x=.55+Math.sin(t*6)*.06;h1.tl.rotation.x=.6+Math.sin(t*3)*.15;
+        rd.g.position.y=.92+Math.abs(Math.sin(t*6))*.04});
+      /* grazing horse and handler, just outside the fence */
+      const h2=horse('#F2EDE4','#8A8378');const ga=L.a-.35;/* toward the shore, away from the plaza */h2.h.position.set(Math.cos(ga)*(RF+.75),0,Math.sin(ga)*(RF+.75));h2.h.rotation.y=-ga;
+      const hn=person(pd,{x:Math.cos(ga)*(RF+.75)+Math.cos(ga)*.5,z:Math.sin(ga)*(RF+.75)+Math.sin(ga)*.5,ry:Math.atan2(-Math.cos(ga),-Math.sin(ga)),shirt:'#F4C95D',hair:'#5A3B2B'});
+      Sp(hn.arms[0],'#8A5A36',.12,.06,.18,0,-.36,.04);
+      anim(t=>{h2.nk.rotation.x=1.35+Math.sin(t*.8)*.12;h2.tl.rotation.z=Math.sin(t*2)*.3;hn.arms[0].rotation.x=-1.2+Math.sin(t*3)*.35;hn.head.rotation.y=Math.sin(t*.5)*.3})}
     if(d.c==='學術性'){/* birds circling over the lawn; birdwatchers follow them with binoculars */
       const L=lawn(d,ang,SPOT_A-1.4,2.2),cx=L.x,cz=L.z;
       const fl=['#5D9FE3','#F4C95D','#E8506A','#7A5A40'].map(c=>bird(g,c));
