@@ -36,7 +36,6 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:900;margin:0;text-wrap:balance}
 .il.sel small{color:#cfe0dc}
 .il.dim{opacity:.4}
 .il .ic{position:relative}
-.il.full .ic::after{content:"🏅";position:absolute;right:-7px;top:-8px;font-size:14px}
 .il.ch{padding-right:12px;font-size:13.5px}
 .il.ch .ic{width:26px;height:26px;font-size:14px}
 .il.roll{background:var(--sun)}
@@ -56,7 +55,6 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:900;margin:0;text-wrap:balance}
 #brand small{font-size:11.5px;color:var(--mut);letter-spacing:.04em;line-height:1.2}
 #brand h1{font-size:21px;line-height:1.15}
 #brand h1 em{font-style:normal;color:var(--coral);-webkit-text-stroke:.4px var(--ink)}
-#stampBtn{justify-self:start;margin-top:3px;display:inline-flex;gap:6px;align-items:center;font:700 12.5px/1 var(--f-body);background:var(--sun);border-radius:999px;padding:5px 10px 5px 8px;box-shadow:0 0 0 1.5px var(--ink) inset;font-variant-numeric:tabular-nums}
 .rbtns{display:flex;gap:6px}
 .ib{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font:700 15px/1 var(--f-disp)}
 .ib.w{width:auto;padding:0 14px;border-radius:999px;font-size:13px}
@@ -210,7 +208,6 @@ dialog::backdrop{background:rgba(24,61,59,.55)}
   <div class="card" id="brand">
     <small id="sem"></small>
     <h1 id="ttl"></h1>
-    <button id="stampBtn"><span>🏅</span><span id="stampTxt">0 / 0</span></button>
   </div>
   <div class="rbtns">
     <button class="ib card" id="music" aria-pressed="true" aria-label="關閉背景音樂">🔊</button>
@@ -228,7 +225,6 @@ dialog::backdrop{background:rgba(24,61,59,.55)}
     <button data-v="map" aria-current="page"><span>🗺</span><em data-k="nav_map">群島</em></button>
     <button data-v="list"><span>☰</span><em data-k="nav_list">清單</em></button>
     <button data-v="fav"><span>♥</span><em><i data-k="nav_fav" style="font-style:normal">收藏</i><b id="fn">0</b></em></button>
-    <button data-v="log"><span>🏅</span><em data-k="nav_log">護照</em></button>
   </nav>
   <div id="tools">
     <button class="tb card" id="dice"><span>🎲</span><em data-k="t_dice">抽一個</em></button>
@@ -253,7 +249,6 @@ dialog::backdrop{background:rgba(24,61,59,.55)}
   <div class="acts">
     <a class="btn" id="cl" target="_blank" rel="noopener"></a>
     <button class="btn g" id="cf"></button>
-    <button class="btn c" id="cw" hidden></button>
   </div>
 </div>
 
@@ -293,42 +288,36 @@ const TX={zh:{
  music_on:'開啟背景音樂',music_off:'關閉背景音樂',music_is_on:'🔊 背景音樂已開啟',music_is_off:'🔇 已靜音',music_hint:'♪ 背景音樂播放中，右上角 🔊 可以靜音',
  title:'東海大學社團島',h1:'東海大學社團<em>島</em>',splash:'正在搭橋，連起七座社團島…',ph:'搜尋社團，中英文都可以',
  t_dice:'抽一個',t_bird:'鳥瞰',t_home:'全景',day:'東海人的一天',
- nav_map:'群島',nav_list:'清單',nav_fav:'收藏',nav_log:'護照',skip:'略過',next:'下一步 →',go:'開始探索',
+ nav_map:'群島',nav_list:'清單',nav_fav:'收藏',skip:'略過',next:'下一步 →',go:'開始探索',
  lit:n=>`找到 ${n} 個社團`,none:'沒有符合的社團，換個關鍵字試試。',other:'其他',hits:n=>`${n} 符合`,
  full:'看完整介紹 ↗',site:'到社團總覽查看 ↗',nopage:'社團總覽網站上沒有這個社團的獨立介紹頁，連結會帶你到分類頁。',
- save:'♡ 收藏',saved:'♥ 已收藏',walk:'🚶 走過去蓋章',dice_k:'🎲 今天的緣分是…',
- st_ok:t=>`✓ 已蓋章 · ${t}`,st_go:'🚶 •ᴗ• 正在過橋…',st_no:'•ᴗ• 走到這座島上，就能蓋到這個社團的章。',
- stamped:n=>`蓋章！${n}`,arrived:n=>`${n} 到了！`,district_done:c=>`🎉 「${c}」的章全部集滿了！`,all_done:n=>`🏆 ${n} 個社團的章全部集滿，你是社團島的島主了！`,
+ save:'♡ 收藏',saved:'♥ 已收藏',dice_k:'🎲 今天的緣分是…',
  favh:'我的收藏',favp:'帶著這份清單去逛社團博覽會吧。',fave:'還沒有收藏。點一座島、挑一個社團，按 ♡ 收藏。',copy:'複製清單',copied:'已複製',copyfail:'已選取文字，請手動複製',copyhdr:'我想參觀的社團：\n',
- listh:'全部社團',logh:'社團護照',logp:(n,t)=>`/ ${t} 個社團已蓋章`,recent:'最近蓋的章',loge:'還沒有印章。點一個社團，•ᴗ• 會走過橋幫你蓋章。',
- reset:'清除所有印章',reset2:'確定清除？再按一次',
+ listh:'全部社團',
  chapel:'路思義教堂',chapel_s:'群島中心',chapel_t:'這裡是群島的中心：路思義教堂。七座社團島都有橋通到這裡。',
- clubs:n=>`${n} 個社團`,stampsOf:(m,t)=>`🏅 ${m}/${t}`,
+ clubs:n=>`${n} 個社團`,
  sem:(y,s)=>`${y} 學年度第 ${s} 學期`,
  foot:n=>`資料來源：課外活動暨學生發展組，共 ${n} 個社團。完整介紹請見 <a href="https://club.thu.edu.tw/" target="_blank" rel="noopener">東海大學社團總覽網站</a>。`,
- tips:['點一座島，看看島上住了哪些社團','拖曳移動地圖，兩指縮放或旋轉','每座島的顏色和建築，代表一種社團類型','拉動下方時間軸，看看島上的一天','按 🎲，讓島嶼替你挑一個社團','集滿一座島的章，會解鎖那座島的成就','體能島外海有人在游泳和潛水，點他們看看是哪個社團'],
+ tips:['點一座島，看看島上住了哪些社團','拖曳移動地圖，兩指縮放或旋轉','每座島的顏色和建築，代表一種社團類型','拉動下方時間軸，看看島上的一天','按 🎲，讓島嶼替你挑一個社團','體能島外海有人在游泳和潛水，點他們看看是哪個社團'],
  events:[[6,'清晨，相思林裡的鳥先醒了'],[8,'第一堂課，橋上都是趕課的人'],[12,'午餐時間，社團攤位前最熱鬧'],[15,'下午，體能島的球聲沒停過'],[18,'傍晚，社辦的燈一盞盞亮起'],[19.5,'社課時間，群島最熱鬧的時候'],[22,'夜深了，藝術島還有人在練團']],
- steps:n=>[['歡迎登上東海大學社團島！',`${n} 個社團依類型住在 7 座小島上，小島之間有橋相連，中間是路思義教堂。`],['點一座島，看看島上有誰','點小島或上方的島名，就會打開那座島的社團清單。點一個社團，•ᴗ• 會走過橋去幫你蓋章。'],['不知道從哪裡開始？','按 🎲 讓島嶼替你抽一個，或用搜尋找出有符合社團的小島。拉動時間軸，看島上從清晨到深夜。']]
+ steps:n=>[['歡迎登上東海大學社團島！',`${n} 個社團依類型住在 7 座小島上，小島之間有橋相連，中間是路思義教堂。`],['點一座島，看看島上有誰','點小島或上方的島名，就會打開那座島的社團清單。點一個社團，•ᴗ• 會走過橋帶你去看看。'],['不知道從哪裡開始？','按 🎲 讓島嶼替你抽一個，或用搜尋找出有符合社團的小島。拉動時間軸，看島上從清晨到深夜。']]
 },en:{
  music_on:'Turn music on',music_off:'Mute music',music_is_on:'🔊 Music on',music_is_off:'🔇 Muted',music_hint:'♪ Music is playing. Tap 🔊 at the top right to mute',
  title:'Tunghai University Club Island',h1:'Tunghai Club <em>Islands</em>',splash:'Building bridges between seven islands…',ph:'Search clubs in Chinese or English',
  t_dice:'Pick',t_bird:'Top',t_home:'Reset',day:'A day at Tunghai',
- nav_map:'Islands',nav_list:'List',nav_fav:'Saved',nav_log:'Passport',skip:'Skip',next:'Next →',go:'Start exploring',
+ nav_map:'Islands',nav_list:'List',nav_fav:'Saved',skip:'Skip',next:'Next →',go:'Start exploring',
  lit:n=>`${n} matching clubs`,none:'No matching clubs. Try another keyword.',other:'Other',hits:n=>`${n} match`,
  full:'See full details ↗',site:'View on club website ↗',nopage:'This club has no page of its own on the club website, so the link opens its category page.',
- save:'♡ Save',saved:'♥ Saved',walk:'🚶 Walk there',dice_k:'🎲 Your match today is…',
- st_ok:t=>`✓ Stamped · ${t}`,st_go:'🚶 •ᴗ• is crossing the bridge…',st_no:'Walk to this island to collect the club’s stamp.',
- stamped:n=>`Stamped! ${n}`,arrived:n=>`Arrived at ${n}`,district_done:c=>`🎉 Every stamp on ${c} collected!`,all_done:n=>`🏆 All ${n} stamps collected. The islands are yours!`,
+ save:'♡ Save',saved:'♥ Saved',dice_k:'🎲 Your match today is…',
  favh:'Saved clubs',favp:'Take this list to the club fair.',fave:'Nothing saved yet. Open an island, pick a club and press ♡.',copy:'Copy list',copied:'Copied',copyfail:'Text selected. Copy it manually.',copyhdr:'Clubs I want to visit:\n',
- listh:'All clubs',logh:'Club passport',logp:(n,t)=>`/ ${t} clubs stamped`,recent:'Recent stamps',loge:'No stamps yet. Pick a club and •ᴗ• will cross the bridges to stamp it.',
- reset:'Clear all stamps',reset2:'Tap again to clear',
+ listh:'All clubs',
  chapel:'Luce Chapel',chapel_s:'Centre',chapel_t:'The heart of the islands: Luce Memorial Chapel. Every island has a bridge leading here.',
- clubs:n=>`${n} clubs`,stampsOf:(m,t)=>`🏅 ${m}/${t}`,
+ clubs:n=>`${n} clubs`,
  sem:(y,s)=>`Academic Year ${+y+1911}–${String((+y+1912)%100).padStart(2,'0')}, Semester ${s}`,
  foot:n=>`Source: Extracurricular Activities and Student Development Division, ${n} clubs. For full details see the <a href="https://club.thu.edu.tw/" target="_blank" rel="noopener">Tunghai University club website</a>.`,
- tips:['Tap an island to see who lives there','Drag to move, pinch to zoom or rotate','Each island’s colour and building stands for one club type','Slide the clock to watch a day on the islands','Tap 🎲 and let the islands pick a club','Collect every stamp on an island to complete it','Someone is swimming and diving off Athletics Isle. Tap them to meet their club'],
+ tips:['Tap an island to see who lives there','Drag to move, pinch to zoom or rotate','Each island’s colour and building stands for one club type','Slide the clock to watch a day on the islands','Tap 🎲 and let the islands pick a club','Someone is swimming and diving off Athletics Isle. Tap them to meet their club'],
  events:[[6,'Dawn. The birds in the acacia grove wake first'],[8,'First class. The bridges fill with students'],[12,'Lunch. Club booths are at their busiest'],[15,'Afternoon. The courts on Athletics Isle never go quiet'],[18,'Evening. Club room lights come on one by one'],[19.5,'Club meeting time, the liveliest hour'],[22,'Late night. Someone on Arts Isle is still rehearsing']],
- steps:n=>[['Welcome to Tunghai Club Islands!',`${n} clubs live on 7 islands, one per club type. Bridges join the islands, with Luce Chapel in the middle.`],['Tap an island to meet its clubs','Tap an island or its name at the top to open its club list. Pick a club and •ᴗ• walks across the bridges to stamp it.'],['Not sure where to start?','Tap 🎲 to let the islands pick, or search to find which islands have a match. Slide the clock to watch the islands from dawn to midnight.']]
+ steps:n=>[['Welcome to Tunghai Club Islands!',`${n} clubs live on 7 islands, one per club type. Bridges join the islands, with Luce Chapel in the middle.`],['Tap an island to meet its clubs','Tap an island or its name at the top to open its club list. Pick a club and •ᴗ• walks across the bridges to take you there.'],['Not sure where to start?','Tap 🎲 to let the islands pick, or search to find which islands have a match. Slide the clock to watch the islands from dawn to midnight.']]
 }};
 const tx=k=>TX[LG][k];
 const CN={'系學會':'Departments','康樂性':'Recreation','體能性':'Athletics','藝術性':'Arts','學術性':'Academic','服務性':'Service','綜合性':'Community'};
@@ -354,13 +343,11 @@ const by=Object.fromEntries(CLUBS.map(x=>[x.zh,x]));
 const ISLES=D.cats.map(c=>({c,L:CLUBS.filter(x=>x.c===c)})).filter(d=>d.L.length);
 ISLES.forEach((d,i)=>d.i=i);
 const isleOf=x=>ISLES.find(d=>d.c===x.c);
-const FKEY='club-fav-'+D.semester,SKEY='club-stamp-'+D.semester;
+const FKEY='club-fav-'+D.semester;
 let fav=new Set();try{fav=new Set(JSON.parse(LS.get(FKEY,'[]')))}catch(e){}
-let stamps={};try{stamps=JSON.parse(LS.get(SKEY,'{}'))||{}}catch(e){}
 let q='',view='map',cur=null,curIsle=null,bird=false;
 const ok=x=>!q||(x.zh+' '+x.en+' '+(x.g||'')+' '+x.c+' '+isn(x.c)).toLowerCase().includes(q);
 const saveFav=()=>{LS.set(FKEY,JSON.stringify([...fav]));$('fn').textContent=fav.size};
-const saveSt=()=>LS.set(SKEY,JSON.stringify(stamps));
 const [SY,STm]=D.semester.split('-');
 const fmtT=ts=>{const d=new Date(ts);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`};
 const hash=s=>{let h=2166136261;for(const ch of String(s)){h^=ch.codePointAt(0);h=Math.imul(h,16777619)}return (h>>>0)/4294967296};
@@ -1053,23 +1040,13 @@ function walkTo(k,club=null){walkGoal=club;
   avGoal=k;avPath=route(avAt,k);if(!avPath.length){arrive();return}
   if(RM){avPos.copy(avPath[avPath.length-1]);avPath=[];arrive()}}
 function arrive(){avAt=avGoal;const n=avAt==='C'?null:ISLES[avAt];
-  if(walkGoal&&n&&walkGoal.c===n.c){const x=walkGoal;walkGoal=null;stampClub(x)}
-  else if(n){tick(`${sty(n.c)[1]} ${tx('arrived')(isn(n.c))}`,4)}
-  if(cur)renderCard()}
+  walkGoal=null;if(n)tick(`${sty(n.c)[1]} ${tx('arrived')(isn(n.c))}`,4)}
 function stepWalk(dt){if(!ok3d)return;const av=world.av;
   if(avPath.length){let sp=7*dt;while(sp>0&&avPath.length){const p=avPath[0],d=avPos.distanceTo(p);if(d>1e-4){const dx=p.x-avPos.x,dz=p.z-avPos.z;if(Math.hypot(dx,dz)>1e-3)av.rotation.y=Math.atan2(dx,dz)}
       if(d<=sp){avPos.copy(p);avPath.shift();sp-=d;if(!avPath.length)arrive()}else{avPos.lerp(p,sp/d);sp=0}}hop+=dt*14}else hop=0;
   av.position.set(avPos.x,avPos.y+Math.abs(Math.sin(hop))*.12,avPos.z);
   const w=avPath.length?Math.sin(hop*2)*.05:0;world.avBody.scale.set(1+w,1-w,1+w)}
 
-function stampClub(x){if(stamps[x.zh]){if(cur===x)renderCard();return}
-  stamps[x.zh]=Date.now();saveSt();
-  toast(tx('stamped')(nm(x)));tick(tx('stamped')(nm(x)),5);
-  const d=isleOf(x),total=CLUBS.filter(y=>stamps[y.zh]).length;
-  if(total===CLUBS.length){setTimeout(()=>{toast(tx('all_done')(CLUBS.length),4500);confetti()},700)}
-  else if(d&&d.L.every(y=>stamps[y.zh])){setTimeout(()=>{toast(tx('district_done')(isn(d.c)),3800);confetti()},700)}
-  updStamp();if(cur===x)renderCard();if(view!=='map')renderPanel();buildLabels()}
-function updStamp(){const n=CLUBS.filter(x=>stamps[x.zh]).length;$('stampTxt').textContent=`${n} / ${CLUBS.length}`}
 
 /* ---------- islands: select & panel ---------- */
 const isMob=()=>innerWidth<900;
@@ -1086,23 +1063,22 @@ let diceMode=false;
 function select(x,{dice=false}={}){cur=x;diceMode=dice;const d=isleOf(x);curIsle=d;
   if(isMob()){$('panel').hidden=true;document.body.classList.remove('paneled')}
   if(ok3d)focus(d.x,d.z,isleZoom(d));
-  if(!stamps[x.zh])walkTo(d.i,x);
+  walkTo(d.i,x);
   renderCard();$('ccard').hidden=false;document.body.classList.add('carded');renderChips();buildLabels();updSel()}
 function deselect(){cur=null;$('ccard').hidden=true;document.body.classList.remove('carded');
   if(isMob()&&view!=='map'){$('panel').hidden=false;document.body.classList.add('paneled');renderPanel()}}
-function renderCard(){const x=cur;if(!x)return;const [col,e]=sty(x.c),st=stamps[x.zh],going=!st&&walkGoal===x&&avPath.length;
+function renderCard(){const x=cur;if(!x)return;const [col,e]=sty(x.c);
   $('ck').hidden=!diceMode;$('ck').textContent=tx('dice_k');
-  $('cb').innerHTML=`<span class="pill" style="--c:${col}">${e} ${E(isn(x.c))}${x.g?' · '+E(gn(x.g)):''}</span><h2>${E(nm(x))}</h2><p class="en">${E(nm2(x))}</p>
-  <p class="status${st?' ok':''}">${st?E(tx('st_ok')(fmtT(st))):going?tx('st_go'):tx('st_no')}</p>${x.k?'':`<p class="note">${tx('nopage')}</p>`}`;
+  $('cb').innerHTML=`<span class="pill" style="--c:${col}">${e} ${E(isn(x.c))}${x.g?' · '+E(gn(x.g)):''}</span><h2>${E(nm(x))}</h2><p class="en">${E(nm2(x))}</p>${x.k?'':`<p class="note">${tx('nopage')}</p>`}`;
   const a=$('cl');a.href=x.u||'https://club.thu.edu.tw/';a.textContent=x.k?tx('full'):tx('site');
-  $('cf').textContent=fav.has(x.zh)?tx('saved'):tx('save');$('cw').textContent=tx('walk');$('cw').hidden=!!st||!!going}
+  $('cf').textContent=fav.has(x.zh)?tx('saved'):tx('save')}
 
 /* ---------- island name signs (HTML, projected) ---------- */
 const lbl=$('lbl');let iEls=[],sEls=[],chEl=null;
 function buildLabels(){lbl.innerHTML='';if(!ok3d)return;
-  iEls=ISLES.map(d=>{const el=document.createElement('button');const [col,ic]=sty(d.c),m=d.L.filter(x=>stamps[x.zh]).length,h=q?d.L.filter(ok).length:0;
-    el.className='il'+(curIsle===d?' sel':'')+(q&&!h?' dim':'')+(m===d.L.length?' full':'');el.style.setProperty('--c',col);
-    el.innerHTML=`<span class="ic">${ic}</span><span>${E(isn(d.c))}<small>${tx('clubs')(d.L.length)} · ${tx('stampsOf')(m,d.L.length)}${h?`<span class="hit">${tx('hits')(h)}</span>`:''}</small></span>`;
+  iEls=ISLES.map(d=>{const el=document.createElement('button');const [col,ic]=sty(d.c),h=q?d.L.filter(ok).length:0;
+    el.className='il'+(curIsle===d?' sel':'')+(q&&!h?' dim':'');el.style.setProperty('--c',col);
+    el.innerHTML=`<span class="ic">${ic}</span><span>${E(isn(d.c))}<small>${tx('clubs')(d.L.length)}${h?`<span class="hit">${tx('hits')(h)}</span>`:''}</small></span>`;
     el.onclick=()=>selectIsle(d);lbl.appendChild(el);return{el,d}});
   sEls=(world.seaLabels||[]).map(s=>{const el=document.createElement('button');el.className='il ch sea';el.style.setProperty('--c',sty(s.club.c)[0]);el.innerHTML=`<span class="ic">${s.icon}</span><span>${E(nm(s.club))}</span>`;el.onclick=()=>select(s.club);lbl.appendChild(el);return{el,s}});
   chEl=document.createElement('button');chEl.className='il ch'+(q?' dim':'');chEl.style.setProperty('--c','#E39A4A');chEl.innerHTML=`<span class="ic">⛪</span><span>${E(tx('chapel'))}<small>${E(tx('chapel_s'))}</small></span>`;chEl.onclick=goChapel;lbl.appendChild(chEl)}
@@ -1160,29 +1136,22 @@ $('dice').onclick=()=>{if(rolling)return;const L=CLUBS.filter(ok);if(!L.length){
     if(++n>12){clearInterval(id);rolling=false;setTimeout(()=>select(f,{dice:true}),250)}},110)};
 $('bird').onclick=()=>{bird=!bird;$('bird').setAttribute('aria-pressed',bird);flyTo(bird?{phi:.03}:{phi:HOME.phi})};
 $('home').onclick=()=>{if(cur)deselect();closePanel();curIsle=null;renderChips();buildLabels();updSel();goHome()};
-$('stampBtn').onclick=()=>go('log');
 
 /* ---------- panels ---------- */
 const heart=z=>`<button class="heart" data-f="${E(z)}" aria-pressed="${fav.has(z)}" aria-label="${E(tx('save'))} ${E(nm(by[z]))}">${fav.has(z)?'♥':'♡'}</button>`;
-const row=x=>`<li style="--c:${sty(x.c)[0]}"><button class="row" data-z="${E(x.zh)}"><b>${E(nm(x))}${stamps[x.zh]?'<span class="ok">✓</span>':''}</b><small>${E(nm2(x))}</small></button>${heart(x.zh)}</li>`;
+const row=x=>`<li style="--c:${sty(x.c)[0]}"><button class="row" data-z="${E(x.zh)}"><b>${E(nm(x))}</b><small>${E(nm2(x))}</small></button>${heart(x.zh)}</li>`;
 const rowsOf=L=>{if(L.some(x=>x.g)){const gs=[...new Set(L.map(x=>x.g||''))];return gs.map(g=>`<h4>${g?E(gn(g)):tx('other')}</h4><ul class="rows">${L.filter(x=>(x.g||'')===g).map(row).join('')}</ul>`).join('')}return`<ul class="rows">${L.map(row).join('')}</ul>`};
-let resetArm=false;
-function renderPanel(){const b=$('pbody');resetArm=false;$('panel').style.removeProperty('--c');
-  if(view==='isle'&&curIsle){const d=curIsle,[col,ic]=sty(d.c),m=d.L.filter(x=>stamps[x.zh]).length,p=Math.round(m/d.L.length*100),L=d.L.filter(ok);
+function renderPanel(){const b=$('pbody');$('panel').style.removeProperty('--c');
+  if(view==='isle'&&curIsle){const d=curIsle,[col,ic]=sty(d.c),L=d.L.filter(ok);
     $('panel').style.setProperty('--c',col);
     $('ph').innerHTML=`<span class="ic">${ic}</span><span>${E(isn(d.c))}<small>${E(cn(d.c))} · ${tx('clubs')(d.L.length)}</small></span>`;
-    b.innerHTML=`<p class="tagl">${E(tagl(d.c))}</p><div class="prog"><div class="pr" style="--c:${col}"><span>🏅</span><span class="bar"><i style="width:${p}%"></i></span><small>${m}/${d.L.length}</small></div></div>
+    b.innerHTML=`<p class="tagl">${E(tagl(d.c))}</p>
       ${L.length?rowsOf(L):`<p class="empty">${tx('none')}</p>`}`}
   if(view==='list'){$('ph').textContent=tx('listh');const h=ISLES.map(d=>{const L=d.L.filter(ok);if(!L.length)return'';
       return`<section class="grp" style="--c:${sty(d.c)[0]}"><h3><button data-isle="${d.i}">${sty(d.c)[1]} ${E(isn(d.c))}</button></h3>${rowsOf(L)}</section>`}).join('');
     b.innerHTML=(h||`<p class="empty">${tx('none')}</p>`)+`<p class="foot">${tx('foot')(CLUBS.length)}</p>`}
   if(view==='fav'){$('ph').textContent=tx('favh');const L=[...fav].map(z=>by[z]).filter(Boolean);
-    b.innerHTML=L.length?`<p style="margin:0 6px 10px;color:var(--mut)">${tx('favp')}</p><ul class="rows">${L.map(row).join('')}</ul><div class="acts"><button class="btn" id="copy">${tx('copy')}</button></div><textarea id="copyT" hidden readonly style="width:100%;margin-top:10px;height:120px;font:inherit"></textarea>`:`<div class="empty"><div class="face">•ᴗ•</div><p>${tx('fave')}</p></div>`}
-  if(view==='log'){$('ph').textContent=tx('logh');const n=CLUBS.filter(x=>stamps[x.zh]).length;
-    const rec=Object.entries(stamps).filter(([z])=>by[z]).sort((a,b)=>b[1]-a[1]).slice(0,30);
-    b.innerHTML=`<div class="big"><b>${n}</b><span>${tx('logp')(n,CLUBS.length)}</span></div><div class="prog">${ISLES.map(d=>{const m=d.L.filter(x=>stamps[x.zh]).length,p=Math.round(m/d.L.length*100);return`<button class="pr" data-isle="${d.i}" style="--c:${sty(d.c)[0]}"><span>${sty(d.c)[1]} ${E(isn(d.c))}</span><span class="bar"><i style="width:${p}%"></i></span><small>${m}/${d.L.length}</small></button>`}).join('')}</div>
-    <div class="grp"><h3>${tx('recent')}</h3>${rec.length?`<ul class="log">${rec.map(([z,t])=>`<li><button data-z="${E(z)}"><time>${fmtT(t)}</time><span>${E(nm(by[z]))}</span></button></li>`).join('')}</ul>`:`<p class="empty" style="padding:12px">${tx('loge')}</p>`}</div>
-    ${n?`<div class="acts"><button class="btn g" id="reset">${tx('reset')}</button></div>`:''}`}}
+    b.innerHTML=L.length?`<p style="margin:0 6px 10px;color:var(--mut)">${tx('favp')}</p><ul class="rows">${L.map(row).join('')}</ul><div class="acts"><button class="btn" id="copy">${tx('copy')}</button></div><textarea id="copyT" hidden readonly style="width:100%;margin-top:10px;height:120px;font:inherit"></textarea>`:`<div class="empty"><div class="face">•ᴗ•</div><p>${tx('fave')}</p></div>`}}
 function setNav(){const v=view==='isle'?'map':view;document.querySelectorAll('nav.tab button').forEach(b=>b.dataset.v===v?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'))}
 function go(v){if(v==='map'){if(cur)deselect();closePanel();return}
   view=v;setNav();if(isMob()){$('ccard').hidden=true;document.body.classList.remove('carded')}$('panel').hidden=false;document.body.classList.add('paneled');renderPanel();$('pbody').scrollTop=0}
@@ -1193,10 +1162,8 @@ document.addEventListener('click',async e=>{const T=e.target;let b;
   else if(b=T.closest('.heart')){const z=b.dataset.f;fav.has(z)?fav.delete(z):fav.add(z);saveFav();if(view==='fav')renderPanel();else{b.setAttribute('aria-pressed',fav.has(z));b.textContent=fav.has(z)?'♥':'♡'}if(cur&&cur.zh===z)renderCard()}
   else if(b=T.closest('[data-z]')){const x=by[b.dataset.z];if(x)select(x)}
   else if(b=T.closest('[data-isle]')){const d=ISLES[+b.dataset.isle];if(d){if(cur)deselect();selectIsle(d)}}
-  else if(T.closest('#reset')){const r=$('reset');if(!resetArm){resetArm=true;r.textContent=tx('reset2');r.classList.replace('g','c')}else{stamps={};saveSt();updStamp();renderPanel();buildLabels()}}
   else if(T.closest('#copy')){const txt=tx('copyhdr')+[...fav].map(z=>nm(by[z])).join('\n');try{await navigator.clipboard.writeText(txt);$('copy').textContent=tx('copied')}catch(err){const ta=$('copyT');ta.hidden=false;ta.value=txt;ta.focus();ta.select();$('copy').textContent=tx('copyfail')}}});
 $('cf').onclick=()=>{const z=cur.zh;fav.has(z)?fav.delete(z):fav.add(z);saveFav();renderCard();if(view!=='map')renderPanel()};
-$('cw').onclick=()=>{if(cur){walkTo(isleOf(cur).i,cur);renderCard()}};
 
 /* ---------- tour ---------- */
 let si=0;const step=()=>{const st=tx('steps')(CLUBS.length);$('th').textContent=st[si][0];$('tp').textContent=st[si][1];$('next').textContent=si<2?tx('next'):tx('go');[...$('tdots').children].forEach((d,i)=>d.classList.toggle('on',i===si))};
@@ -1213,12 +1180,11 @@ function applyLang(){const e=LG==='en';document.documentElement.lang=e?'en':'zh-
 document.addEventListener('click',e=>{if(e.target.closest('.langbtn')){LG=LG==='en'?'zh':'en';LS.set('club-lang',LG);applyLang()}});
 
 /* ---------- loop ---------- */
-let last=performance.now(),cardWalk=false;
+let last=performance.now();
 function loop(now){requestAnimationFrame(loop);if(document.hidden)return;const dt=Math.min(.05,(now-last)/1000);last=now;
   if(playing){let m=+$('tm').value+dt*36;if(m>1439)m=360;$('tm').value=m;applyTime(m/60);evCheck()}
   stepTween(now);if(!tw)controls.update();
   stepWalk(dt);
-  const w=!!(cur&&walkGoal===cur&&avPath.length);if(w!==cardWalk){cardWalk=w;renderCard()}
   if(!RM){const t=now/1000;world.MT.foam.opacity=.45+Math.sin(t*1.4)*.2;
     world.waveData.forEach((d,i)=>{tmpM.compose(tmpV.set(d.x+Math.sin(t*.3+d.p)*.4,.02,d.z),tmpQ.setFromEuler(tmpE.set(0,.6,0)),tmpS.setScalar(.5+.5*Math.sin(t*d.s+d.p)));world.waves.setMatrixAt(i,tmpM)});world.waves.instanceMatrix.needsUpdate=true;
     const ba=t*.03,br=WORLD_R+2;world.boat.position.set(Math.cos(ba)*br,Math.sin(t*2)*.04,Math.sin(ba)*br);world.boat.rotation.set(Math.sin(t*1.7)*.05,-ba,0);
@@ -1243,7 +1209,7 @@ const BGM=(()=>{const a=new Audio('bgm.mp3');a.loop=true;a.volume=.5;a.preload='
 $('music').onclick=()=>BGM.toggle();
 
 /* ---------- boot ---------- */
-saveFav();updStamp();
+saveFav();
 const now=new Date();let h0=now.getHours()+now.getMinutes()/60;if(h0<6)h0=23;
 $('tm').value=Math.round(h0*60/5)*5;
 if(ok3d){resize();
