@@ -685,9 +685,10 @@ if(ok3d){
     const fz=endWall(F,0,1,13).z;endWall(Rr,1,-1,14);
     /* the stacked boxes capping the skylight at the rear */
     {const rz=zR+setR;B(g,'#ECE4D2',gR*2+.22,.2,.34,0,H-.32,rz-.05);B(g,'#ECE4D2',gR*2+.12,.16,.26,0,H-.62,rz-.1);B(g,'#2B2F33',gR*2+.05,.08,.02,0,H-.27,rz-.23)}
-    /* entrance: a small house-shaped porch, then steps */
-    B(g,'#ECE4D2',.4,.42,.32,0,0,fz+.12);mesh(gable(.4,.32,.14,.02),'#ECE4D2',0,.42,fz+.12,g);B(g,'#5A3B26',.24,.34,.03,0,0,fz+.29);
-    B(g,'#CFC7B6',.9,.06,.35,0,0,fz+.45);B(g,'#D9D2C3',.7,.12,.22,0,0,fz+.38);
+    /* entrance: a house-shaped door set flush in the glass wall, split down the middle */
+    {const ds=new THREE.Shape([[-.22,0],[.22,0],[.22,.44],[0,.6],[-.22,.44]].map(([x,y])=>new THREE.Vector2(x,y)));
+      const dr=mesh(new THREE.ShapeGeometry(ds),'#ECE4D2',0,0,fz+.03,g);dr.castShadow=false;dr.rotation.x=-Math.atan2(setF,h1);
+      B(g,frame,.025,.6,.02,0,0,fz+.035).rotation.x=-Math.atan2(setF,h1)}
     /* the cross, standing on the rear pair at the joint */
     const cz=zJ-jb-.12;B(g,'#3A3A3A',.06,.85,.06,0,H+.1,cz);B(g,'#3A3A3A',.38,.06,.06,0,H+.62,cz);
     /* skylight glass along both ridges */
