@@ -206,7 +206,6 @@ dialog::backdrop{background:rgba(24,61,59,.55)}
     <button id="stampBtn"><span>🏅</span><span id="stampTxt">0 / 0</span></button>
   </div>
   <div class="rbtns">
-    <button class="ib card" id="music" aria-pressed="true" aria-label="關閉背景音樂">🔊</button>
     <button class="ib w card langbtn" aria-label="Language / 語言">EN</button>
     <button class="ib card" id="help" aria-label="使用說明">?</button>
   </div>
@@ -280,7 +279,6 @@ let LG=LS.get('club-lang','zh')==='en'?'en':'zh';
 
 /* ---------- text ---------- */
 const TX={zh:{
- music_on:'開啟背景音樂',music_off:'關閉背景音樂',music_is_on:'🔊 背景音樂已開啟',music_is_off:'🔇 已靜音',music_hint:'♪ 背景音樂播放中，右上角 🔊 可以靜音',
  title:'東海大學社團島',h1:'東海大學社團<em>島</em>',splash:'正在搭橋，連起七座社團島…',ph:'搜尋社團，中英文都可以',
  t_dice:'抽一個',t_bird:'鳥瞰',t_home:'全景',day:'東海人的一天',
  nav_map:'群島',nav_list:'清單',nav_fav:'收藏',nav_log:'護照',skip:'略過',next:'下一步 →',go:'開始探索',
@@ -300,7 +298,6 @@ const TX={zh:{
  events:[[6,'清晨，相思林裡的鳥先醒了'],[8,'第一堂課，橋上都是趕課的人'],[12,'午餐時間，社團攤位前最熱鬧'],[15,'下午，體能島的球聲沒停過'],[18,'傍晚，社辦的燈一盞盞亮起'],[19.5,'社課時間，群島最熱鬧的時候'],[22,'夜深了，藝術島還有人在練團']],
  steps:n=>[['歡迎登上東海大學社團島！',`${n} 個社團依類型住在 7 座小島上，小島之間有橋相連，中間是路思義教堂。`],['點一座島，看看島上有誰','點小島或上方的島名，就會打開那座島的社團清單。點一個社團，•ᴗ• 會走過橋去幫你蓋章。'],['不知道從哪裡開始？','按 🎲 讓島嶼替你抽一個，或用搜尋找出有符合社團的小島。拉動時間軸，看島上從清晨到深夜。']]
 },en:{
- music_on:'Turn music on',music_off:'Mute music',music_is_on:'🔊 Music on',music_is_off:'🔇 Muted',music_hint:'♪ Music is playing. Tap 🔊 at the top right to mute',
  title:'Tunghai University Club Island',h1:'Tunghai Club <em>Islands</em>',splash:'Building bridges between seven islands…',ph:'Search clubs in Chinese or English',
  t_dice:'Pick',t_bird:'Top',t_home:'Reset',day:'A day at Tunghai',
  nav_map:'Islands',nav_list:'List',nav_fav:'Saved',nav_log:'Passport',skip:'Skip',next:'Next →',go:'Start exploring',
@@ -1174,7 +1171,7 @@ $('help').onclick=()=>{si=0;step();$('tour').showModal()};
 function applyLang(){const e=LG==='en';document.documentElement.lang=e?'en':'zh-Hant';document.title=tx('title');
   document.querySelectorAll('[data-k]').forEach(n=>n.textContent=tx(n.dataset.k));
   $('ttl').innerHTML=tx('h1');$('q').placeholder=tx('ph');$('q').setAttribute('aria-label',tx('ph'));
-  document.querySelectorAll('.langbtn').forEach(b=>b.textContent=e?'中文':'EN');MUSIC.ui();
+  document.querySelectorAll('.langbtn').forEach(b=>b.textContent=e?'中文':'EN');
   $('sem').textContent=tx('sem')(SY,STm);renderChips();updCount();step();buildLabels();if(ok3d)world.redrawSigns();if(cur)renderCard();if(view!=='map')renderPanel();lastEv=-1;evCheck()}
 document.addEventListener('click',e=>{if(e.target.closest('.langbtn')){LG=LG==='en'?'zh':'en';LS.set('club-lang',LG);applyLang()}});
 
@@ -1194,44 +1191,6 @@ function loop(now){requestAnimationFrame(loop);if(document.hidden)return;const d
     (world.fires||[]).forEach((f,i)=>{f.scale.set(1,1+Math.sin(t*9+i*2)*.15,1)});
     if(world.sel.visible){world.sel.material.opacity=.55+Math.sin(t*3)*.35}}
   renderer.render(scene,camera);placeLabels()}
-
-/* ---------- background music: an original island loop, synthesised with Web Audio (no audio files) ----------
-   F major, 96 BPM, eight bars of F–Dm–B♭–C: marimba lead, soft bass, warm pad, light shaker.
-   Browsers only allow sound after the viewer interacts, so it starts on the first tap or key press; 🔊/🔇 toggles it. */
-const MUSIC=(()=>{
-  let ctx=null,master=null,timer=null,step=0,next=0,started=false,on=LS.get('club-music','on')!=='off';
-  const BPM=96,SD=60/BPM/2;/* one step = an eighth note */
-  const N=n=>{const m=n.match(/^([A-G])(#|b)?(\d)$/),b={C:0,D:2,E:4,F:5,G:7,A:9,B:11}[m[1]]+(m[2]==='#'?1:m[2]==='b'?-1:0);return 440*Math.pow(2,(b+12*(+m[3]+1)-69)/12)};
-  const MEL=['A4 - C5 - D5 C5 A4 -','G4 - A4 - F4 - - -','D5 - C5 - A4 - G4 A4','F4 - - - D4 - F4 -','D5 - D5 C5 D5 - F5 -','D5 - C5 - A4 - - -','G4 - A4 C5 - A4 G4 -','E4 - G4 - C5 - - -'].map(b=>b.split(' '));
-  const CH=[['F3','A3','C4'],['F3','A3','C4'],['D3','F3','A3'],['D3','F3','A3'],['Bb2','D3','F3'],['Bb2','D3','F3'],['C3','E3','G3'],['C3','E3','G3']];
-  const BASS=['F2','F2','D2','D2','Bb1','Bb1','C2','C2'];
-  let noise=null;
-  function init(){ctx=new (window.AudioContext||window.webkitAudioContext)();master=ctx.createGain();master.gain.value=0;
-    const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=5200;master.connect(lp);lp.connect(ctx.destination);
-    const buf=ctx.createBuffer(1,ctx.sampleRate*.2,ctx.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;noise=buf}
-  const env=(t,a,dec,peak)=>{const g=ctx.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+dec);g.connect(master);return g};
-  const osc=(type,f,t,dur,dest,det=0)=>{const o=ctx.createOscillator();o.type=type;o.frequency.value=f;o.detune.value=det;o.connect(dest);o.start(t);o.stop(t+dur+.05)};
-  function marimba(f,t,v=.22){const g=env(t,.004,.55,v);osc('sine',f,t,.6,g);const g2=env(t,.002,.12,v*.35);osc('sine',f*4,t,.15,g2)}
-  function bell(f,t){const g=env(t,.003,1.1,.05);osc('triangle',f*2,t,1.2,g)}
-  function bass(f,t){const g=env(t,.01,.7,.2);osc('triangle',f,t,.8,g)}
-  function pad(fs,t,dur){fs.forEach((n,i)=>{const g=ctx.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.022,t+.6);g.gain.linearRampToValueAtTime(0,t+dur);
-    const f=ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=900;g.connect(f);f.connect(master);osc('sawtooth',N(n),t,dur,g,-6);osc('sawtooth',N(n),t,dur,g,6)})}
-  function shaker(t,v){const s=ctx.createBufferSource();s.buffer=noise;const f=ctx.createBiquadFilter();f.type='highpass';f.frequency.value=7000;const g=env(t,.002,.06,v);s.connect(f);f.connect(g);s.start(t);s.stop(t+.1)}
-  function play(i,t){const bar=Math.floor(i/8)%8,s=i%8,loop=Math.floor(i/64),n=MEL[bar][s];
-    if(n!=='-')marimba(N(n),t);if(loop%2&&n!=='-'&&s%4===0)bell(N(n),t);
-    if(s===0){pad(CH[bar],t,SD*8);bass(N(BASS[bar]),t)}if(s===4)bass(N(BASS[bar])*1.5,t);
-    shaker(t,s%2?.05:.025)}
-  function tickSched(){while(next<ctx.currentTime+.15){play(step,next);step++;next+=SD}}
-  function start(){if(!ctx)init();if(ctx.state==='suspended')ctx.resume();master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setTargetAtTime(.5,ctx.currentTime,.4);
-    if(!timer){next=ctx.currentTime+.08;timer=setInterval(tickSched,30)}started=true}
-  function stop(){if(!ctx)return;master.gain.setTargetAtTime(0,ctx.currentTime,.15);setTimeout(()=>{if(!on&&timer){clearInterval(timer);timer=null;ctx.suspend()}},500)}
-  function ui(){const b=$('music');if(!b)return;b.textContent=on?'🔊':'🔇';b.setAttribute('aria-pressed',on);b.setAttribute('aria-label',on?tx('music_off'):tx('music_on'));b.title=b.getAttribute('aria-label')}
-  function toggle(){on=!on;LS.set('club-music',on?'on':'off');on?start():stop();ui();toast(on?tx('music_is_on'):tx('music_is_off'),1600)}
-  const first=e=>{if(e.target.closest&&e.target.closest('#music'))return;removeEventListener('pointerdown',first,true);removeEventListener('keydown',first,true);if(on&&!started){start();tick(tx('music_hint'),5)}};
-  addEventListener('pointerdown',first,true);addEventListener('keydown',first,true);
-  document.addEventListener('visibilitychange',()=>{if(!ctx||!on)return;document.hidden?ctx.suspend():ctx.resume()});
-  return {toggle,ui}})();
-$('music').onclick=()=>MUSIC.toggle();
 
 /* ---------- boot ---------- */
 saveFav();updStamp();
