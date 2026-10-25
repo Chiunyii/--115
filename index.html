@@ -74,14 +74,15 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:900;margin:0;text-wrap:balance}
 .chip.off{opacity:.45}
 #cnt{grid-column:1/-1;justify-self:start;font-size:12.5px;padding:3px 10px;border-radius:999px;background:var(--ink);color:#fff}
 
-#tools{right:var(--sr);top:50%;transform:translateY(-35%);display:grid;gap:8px}
+#rail{right:var(--sr);top:50%;transform:translateY(-50%);display:grid;gap:10px;justify-items:end;transition:right .2s}
+#tools{display:grid;gap:8px;transition:opacity .2s}
 .tb{width:52px;padding:7px 0 5px;border-radius:16px;display:grid;justify-items:center;gap:1px;font:500 10.5px/1.2 var(--f-body)}
 .tb span{font-size:19px;line-height:1.1}
 .tb em{font-style:normal}
 .tb[aria-pressed="true"]{background:var(--ink);color:#fff}
 #dice{background:var(--coral)}
 
-#bottom{left:var(--sl);right:var(--sr);bottom:calc(var(--sb) + 66px);display:grid;gap:8px;pointer-events:none}
+#bottom{left:var(--sl);right:var(--sr);bottom:calc(var(--sb) + 12px);display:grid;gap:8px;pointer-events:none}
 #bottom>*{pointer-events:auto}
 #ticker{justify-self:start;max-width:100%;display:flex;gap:8px;align-items:center;padding:6px 14px 6px 10px;border-radius:999px;font-size:13px;overflow:hidden}
 #ticker .f{font:700 13px/1 var(--f-disp);flex:none}
@@ -93,16 +94,15 @@ h1,h2,h3{font-family:var(--f-disp);font-weight:900;margin:0;text-wrap:balance}
 #clock .tt small{font-size:10.5px;color:var(--mut);white-space:nowrap}
 #tm{width:100%;accent-color:var(--coral);min-width:0}
 
-nav.tab{position:fixed;z-index:6;left:0;right:0;bottom:0;background:var(--coral);box-shadow:0 -2px 0 var(--ink);padding:0 var(--sr) var(--sb) var(--sl);display:grid;grid-template-columns:repeat(4,1fr)}
-nav.tab button{padding:8px 0 7px;display:grid;justify-items:center;gap:1px;font:500 12px/1.2 var(--f-body);color:var(--ink)}
-nav.tab button>span{font-size:18px;line-height:1.2;padding:0 14px;border-radius:999px}
+nav.tab{display:grid;gap:3px;padding:5px;border-radius:20px;background:var(--coral);box-shadow:var(--shadow),0 0 0 2px var(--ink) inset}
+nav.tab button{position:relative;width:52px;padding:6px 0 5px;border-radius:15px;display:grid;justify-items:center;gap:1px;font:500 10.5px/1.2 var(--f-body);color:var(--ink)}
+nav.tab button>span{font-size:18px;line-height:1.2}
 nav.tab button em{font-style:normal}
-nav.tab button[aria-current="page"]{font-weight:700}
-nav.tab button[aria-current="page"]>span{background:var(--sand);box-shadow:0 0 0 1.5px var(--ink) inset}
-nav.tab b{font:700 10px/1 var(--f-body);background:var(--paper);border-radius:999px;padding:2px 5px;margin-left:2px;font-variant-numeric:tabular-nums}
+nav.tab button[aria-current="page"]{font-weight:700;background:var(--sand);box-shadow:0 0 0 1.5px var(--ink) inset}
+nav.tab b{position:absolute;top:2px;right:3px;font:700 10px/1 var(--f-body);background:var(--paper);border-radius:999px;padding:2px 5px;box-shadow:0 0 0 1px var(--ink) inset;font-variant-numeric:tabular-nums}
 
 /* panels */
-#panel,#ccard{position:fixed;z-index:7;left:var(--sl);right:var(--sr);bottom:calc(var(--sb) + 62px)}
+#panel,#ccard{position:fixed;z-index:7;left:var(--sl);right:var(--sr);bottom:calc(var(--sb) + 12px)}
 #panel{max-height:min(60vh,640px);display:flex;flex-direction:column;overflow:hidden}
 #panel header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 12px 8px 18px}
 #panel header h2{font-size:22px;display:flex;align-items:center;gap:10px}
@@ -179,15 +179,22 @@ dialog::backdrop{background:rgba(24,61,59,.55)}
   .rbtns{grid-column:4;grid-row:1}
   #chips{grid-column:1/-1;grid-row:2;margin:0;padding-right:0}
   #cnt{grid-row:3}
-  #panel{left:auto;width:400px;top:calc(var(--st) + 150px);bottom:calc(var(--sb) + 70px);max-height:none}
-  #ccard{left:calc(var(--sl) + 4px);bottom:calc(var(--sb) + 132px);width:420px}
+  #panel{left:auto;width:400px;top:calc(var(--st) + 150px);bottom:calc(var(--sb) + 16px);max-height:none}
+  #ccard{left:calc(var(--sl) + 4px);bottom:calc(var(--sb) + 120px);width:420px}
   #bottom{right:auto;width:min(560px,calc(100% - 120px))}
-  nav.tab{grid-template-columns:repeat(4,minmax(0,170px));justify-content:center}
-  nav.tab button{display:flex;justify-content:center;align-items:center;gap:8px;padding:10px 0}
-  #tools{transition:right .2s}
-  body.paneled #tools{right:calc(var(--sr) + 412px)}
+  body.paneled #rail{right:calc(var(--sr) + 412px)}
 }
-@media(max-width:899px){body.carded #tools,body.paneled #tools{opacity:0;pointer-events:none}#tools{transition:opacity .2s}body.paneled #bottom,body.carded #bottom{visibility:hidden}}
+@media(max-width:899px){
+  /* phones: the rail sits below the header; while a panel or card is open only the menu stays, and the panel stops short of it */
+  #rail{top:calc(var(--st) + 200px);transform:none}
+  body.carded #tools,body.paneled #tools{opacity:0;pointer-events:none}
+  body.paneled #bottom,body.carded #bottom{visibility:hidden}
+  nav.tab button{width:44px;padding:8px 0}
+  nav.tab button em{font-size:0;line-height:0}
+  nav.tab b{top:-2px;right:-3px}
+  #panel{max-height:max(220px,min(60vh,calc(100% - var(--st) - 396px)))}
+  #bottom{right:calc(var(--sr) + 66px)}
+}
 @media(max-width:380px){#brand h1{font-size:18px}.tb{width:46px}#clock .tt small{display:none}.il{font-size:13.5px}}
 @media(hover:hover){.chip:hover,.tb:hover,.ib:hover{filter:brightness(.97)}.row:hover b{text-decoration:underline}.il:hover{filter:brightness(.97)}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -215,10 +222,19 @@ dialog::backdrop{background:rgba(24,61,59,.55)}
   <div id="cnt" hidden aria-live="polite"></div>
 </div>
 
-<div class="hud" id="tools">
-  <button class="tb card" id="dice"><span>🎲</span><em data-k="t_dice">抽一個</em></button>
-  <button class="tb card" id="bird" aria-pressed="false"><span>🛰</span><em data-k="t_bird">鳥瞰</em></button>
-  <button class="tb card" id="home"><span>⌂</span><em data-k="t_home">全景</em></button>
+<!-- right-hand rail: main menu on top, map tools below — floats over the map instead of a full-width bottom bar -->
+<div class="hud" id="rail">
+  <nav class="tab" aria-label="主選單">
+    <button data-v="map" aria-current="page"><span>🗺</span><em data-k="nav_map">群島</em></button>
+    <button data-v="list"><span>☰</span><em data-k="nav_list">清單</em></button>
+    <button data-v="fav"><span>♥</span><em><i data-k="nav_fav" style="font-style:normal">收藏</i><b id="fn">0</b></em></button>
+    <button data-v="log"><span>🏅</span><em data-k="nav_log">護照</em></button>
+  </nav>
+  <div id="tools">
+    <button class="tb card" id="dice"><span>🎲</span><em data-k="t_dice">抽一個</em></button>
+    <button class="tb card" id="bird" aria-pressed="false"><span>🛰</span><em data-k="t_bird">鳥瞰</em></button>
+    <button class="tb card" id="home"><span>⌂</span><em data-k="t_home">全景</em></button>
+  </div>
 </div>
 
 <div class="hud" id="bottom">
@@ -249,12 +265,6 @@ dialog::backdrop{background:rgba(24,61,59,.55)}
 <div class="card" id="toast" role="status"></div>
 <div class="card" id="nogl" hidden></div>
 
-<nav class="tab" aria-label="主選單">
-  <button data-v="map" aria-current="page"><span>🗺</span><em data-k="nav_map">群島</em></button>
-  <button data-v="list"><span>☰</span><em data-k="nav_list">清單</em></button>
-  <button data-v="fav"><span>♥</span><em><i data-k="nav_fav" style="font-style:normal">收藏</i><b id="fn">0</b></em></button>
-  <button data-v="log"><span>🏅</span><em data-k="nav_log">護照</em></button>
-</nav>
 
 <dialog id="tour"><div class="din">
   <div style="display:flex;justify-content:space-between;align-items:center"><div class="face">•ᴗ•</div><button class="btn g langbtn" style="padding:6px 12px">EN</button></div>
