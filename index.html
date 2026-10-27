@@ -293,6 +293,7 @@ const TX={zh:{
  full:'看完整介紹 ↗',site:'到社團總覽查看 ↗',nopage:'社團總覽網站上沒有這個社團的獨立介紹頁，連結會帶你到分類頁。',
  save:'♡ 收藏',saved:'♥ 已收藏',dice_k:'🎲 今天的緣分是…',
  favh:'我的收藏',favp:'帶著這份清單去逛社團博覽會吧。',fave:'還沒有收藏。點一座島、挑一個社團，按 ♡ 收藏。',copy:'複製清單',copied:'已複製',copyfail:'已選取文字，請手動複製',copyhdr:'我想參觀的社團：\n',
+ arrived:n=>`${n} 到了！`,
  listh:'全部社團',
  chapel:'路思義教堂',chapel_s:'群島中心',chapel_t:'這裡是群島的中心：路思義教堂。七座社團島都有橋通到這裡。',
  clubs:n=>`${n} 個社團`,
@@ -310,6 +311,7 @@ const TX={zh:{
  full:'See full details ↗',site:'View on club website ↗',nopage:'This club has no page of its own on the club website, so the link opens its category page.',
  save:'♡ Save',saved:'♥ Saved',dice_k:'🎲 Your match today is…',
  favh:'Saved clubs',favp:'Take this list to the club fair.',fave:'Nothing saved yet. Open an island, pick a club and press ♡.',copy:'Copy list',copied:'Copied',copyfail:'Text selected. Copy it manually.',copyhdr:'Clubs I want to visit:\n',
+ arrived:n=>`Arrived at ${n}`,
  listh:'All clubs',
  chapel:'Luce Chapel',chapel_s:'Centre',chapel_t:'The heart of the islands: Luce Memorial Chapel. Every island has a bridge leading here.',
  clubs:n=>`${n} clubs`,
@@ -1060,8 +1062,9 @@ function goChapel(){curIsle=null;closePanel();focus(0,0,2.2);walkTo('C');toast(t
 
 /* ---------- club card ---------- */
 let diceMode=false;
-function select(x,{dice=false}={}){cur=x;diceMode=dice;const d=isleOf(x);curIsle=d;
+function select(x,{dice=false}={}){cur=x;diceMode=dice;const d=isleOf(x),prev=curIsle;curIsle=d;
   if(isMob()){$('panel').hidden=true;document.body.classList.remove('paneled')}
+  else if(view==='isle'&&prev!==d)renderPanel();/* keep an open island panel in step with the card */
   if(ok3d)focus(d.x,d.z,isleZoom(d));
   walkTo(d.i,x);
   renderCard();$('ccard').hidden=false;document.body.classList.add('carded');renderChips();buildLabels();updSel()}
