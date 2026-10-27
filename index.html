@@ -178,7 +178,9 @@ dialog::backdrop{background:rgba(24,61,59,.55)}
   #chips{grid-column:1/-1;grid-row:2;margin:0;padding-right:0}
   #cnt{grid-row:3}
   #panel{left:auto;width:400px;top:calc(var(--st) + 150px);bottom:calc(var(--sb) + 16px);max-height:none}
-  #ccard{left:calc(var(--sl) + 4px);bottom:calc(var(--sb) + 120px);width:420px}
+  /* desktop: the club card opens in the middle of the map (of the area left of the list when one is open) */
+  #ccard{left:50%;top:50%;right:auto;bottom:auto;width:min(440px,calc(100% - 48px));max-width:none;transform:translate(-50%,-50%);box-shadow:0 18px 44px rgba(24,61,59,.3),0 0 0 2px var(--ink) inset}
+  body.paneled #ccard{left:calc((100% - 412px) / 2)}
   #bottom{right:auto;width:min(560px,calc(100% - 120px))}
   body.paneled #rail{right:calc(var(--sr) + 412px)}
 }
@@ -1016,6 +1018,7 @@ function focus(x,z,zoom){if(!ok3d)return;sph.setFromVector3(tmpV.copy(camera.pos
   const vh=(camera.top-camera.bottom)/zoom,vw=(camera.right-camera.left)/zoom,panel=view!=='map';
   if(innerWidth<900){if(panel){const k=vh*.24/Math.max(.35,Math.cos(sph.phi));ox=Math.sin(th)*k;oz=Math.cos(th)*k}}
   else if(panel){const k=vw*200/innerWidth;ox=Math.cos(th)*k;oz=-Math.sin(th)*k}
+  if(innerWidth>=900&&cur){const k=vh*.24/Math.max(.35,Math.cos(sph.phi));ox-=Math.sin(th)*k;oz-=Math.cos(th)*k}/* desktop card sits mid-screen: frame the island below it */
   flyTo({t:{x:x+ox,z:z+oz},zoom})}
 /* nudge the archipelago a little below centre so the header never covers the far island */
 const homeT=()=>{const k=(camera.top-camera.bottom)*.1/Math.cos(HOME.phi);return{x:Math.sin(HOME.theta)*-k,z:Math.cos(HOME.theta)*-k}};
